@@ -17,5 +17,7 @@ il prompt `prompts/FASE-A-studio-fedele.md`: produce composition-spec e
 animation-spec, da cui si riassume la riga qui sopra.
 
 ## Stato
-- 01 BEC: caricato ✅ — spec da generare (Fase A).
+- 01 BEC: caricato ✅ — **spec generati ✅** (`composition-spec.md` +
+  `animation-spec.md`). Griglia 14 col, palette #003250/#fabdb4 su bianco,
+  font PP Woodland + Manrope, reveal scale 1.15→1 + clip-path.
 - 02–37: da caricare.
