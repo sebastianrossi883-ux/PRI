@@ -28,6 +28,64 @@ chiede. Non riempie mai un vuoto con la sua media. È lì che nasce il grezzo.
 
 ---
 
+## 1-bis. "Saranno copie esatte?" — NO. Cosa si clona e cosa no
+
+Si clona lo **scheletro**, non il **vestito**. Un sito ha due strati:
+
+- **Strato invisibile (si CLONA):** griglia, proporzioni, ritmo dello spazio,
+  asimmetria, *tecniche* di animazione (clip-path reveal, scale-scrub). È il
+  **DNA compositivo** — l'intelligenza che rende un sito Michelin e non grezzo.
+- **Strato visibile (si SOSTITUISCE al 100%):** foto, testi, colori, font,
+  nome, piatti. È l'**identità**, e diventa quella del ristorante.
+
+→ Il risultato ha lo scheletro geniale del reference ma un **aspetto
+completamente diverso.** Chi conosce l'originale non lo riconosce, perché tutto
+ciò che si *vede* è cambiato. Si copia il **mestiere** Michelin, non l'aspetto.
+(Come un musicista che studia gli accordi di un capolavoro e scrive una SUA
+canzone — non copia la canzone, copia il mestiere.)
+
+### Le manopole dell'originalità (le decide l'utente)
+| Manopola | Effetto |
+|---|---|
+| Contenuti (sempre) | testi/piatti propri |
+| **Fotografia (sempre)** | driver visivo #1: cambia le foto → sembra un altro sito |
+| Palette colori (opz.) | cambio colori → irriconoscibile |
+| Font (opz.) | es. PPWoodland del BEC → font propri |
+| N. di sorgenti | 1 = vicino a copia · più siti combinati = originale (Livello 3) |
+
+---
+
+## 1-ter. I 4 livelli di originalità (dal copia all'arte)
+
+Il metodo NON tappa a "copie esatte": scala dalla copia sicura all'arte
+diretta dall'utente, senza mai passare dal grezzo.
+
+- **Livello 1 — Copia esatta.** Cloni un sito, cambi i testi. Qualità
+  garantita ma è una copia. Il *pavimento*, la rete di sicurezza.
+- **Livello 2 — Copia rivestita (sweet spot commerciale).** Un reference
+  diverso per ogni cliente + sue foto/colori/font. Per il cliente è su misura:
+  nessuno vede lo stesso sito di un altro.
+- **Livello 3 — ARTE: ricombinazione diretta dall'utente.** Scheletro del
+  sito A + interludio del sito B + tipografia del sito C + anima del ristorante.
+  Ogni pezzo è Michelin-grade; la **composizione è la visione dell'utente**.
+  Sito mai esistito, fatto al 100% di materiale altissimo. Arte interattiva vera.
+- **Livello 4 — LA TRAPPOLA.** "IA, fai qualcosa di artistico" + libertà →
+  regressione alla media → grezzo. Da evitare sempre.
+
+**La regola d'oro:** la differenza tra Frankenstein (L4) e arte (L3) non è
+*combinare*, è **chi dirige**. Se combina l'IA alla cieca → grezzo. Se dirige
+l'utente e l'IA esegue con pezzi già blindati → arte. **L'IA non è l'artista
+(regredisce alla media): è le mani perfette di un artista (l'utente).** Il
+soffitto di qualità è il gusto dell'utente, non l'immaginazione dell'IA.
+
+**Il percorso conta:** prima cloni fedele (L1-2) e padroneggi i 37, POI ti
+guadagni la ricombinazione (L3). Chi salta all'arte senza aver incassato i
+mattoni Michelin ricade nel Frankenstein (L4). L'invenzione sta SOLO al livello
+della composizione (dell'utente, approvata al cancello del wireframe); ogni
+pezzo resta fedele e Michelin-grade.
+
+---
+
 ## 2. Il capitale: 37 siti Michelin animati
 
 I 37 siti scaricati (ristoranti Michelin, interattivi e animati) **sono il
