@@ -1,41 +1,76 @@
 @import "tailwindcss";
 
 /*
-  DESIGN TOKENS
-  Default = AGENTS.md (alabastro). PER SITO: sostituisci questi valori con
-  quelli del composition-spec del reference scelto.
-  Esempio Reference #01 (BEC) è commentato sotto.
+  FONT REALI del Reference #01 (BEC).
+  NB licenza: "PP Woodland" è un font commerciale (Pangram Pangram). Per la
+  produzione serve licenza, oppure sostituire con un serif simile free
+  (es. "Fraunces" / "Cormorant"). Qui usato per fedeltà al reference.
+*/
+@font-face {
+  font-family: "PP Woodland";
+  src: url("/fonts/PPWoodland-Light.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "PP Woodland";
+  src: url("/fonts/PPWoodland-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "PP Woodland";
+  src: url("/fonts/PPWoodland-Medium.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Manrope";
+  src: url("/fonts/Manrope-Light.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Manrope";
+  src: url("/fonts/Manrope-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Manrope";
+  src: url("/fonts/Manrope-Medium.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+
+/*
+  DESIGN TOKENS — clonati dal composition-spec del Reference #01 (BEC).
 */
 @theme {
-  --color-base: #ecebe8;     /* BEC: #FFFFFF  */
-  --color-ink: #1c1b1a;      /* BEC: #003250  */
-  --color-accent: #b9a37e;   /* BEC: #fabdb4  */
+  --color-base: #ffffff;     /* BEC: sfondo bianco */
+  --color-ink: #003250;      /* BEC: blu petrolio (ink dominante) */
+  --color-accent: #fabdb4;   /* BEC: salmone (sovratitoli, selezione) */
 
   --font-display: "PP Woodland", Georgia, "Times New Roman", serif;
   --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
 }
 
 :root {
-  /* Scala di spaziatura editoriale (override per reference). */
+  /* Scala di spaziatura reale del BEC */
   --space-xs: 10px;
   --space-sm: 20px;
   --space-md: 40px;
   --space-lg: 80px;
   --space-xl: 120px;
-  --section-padding: 100px; /* BEC desktop */
+  --section-padding: 100px; /* BEC desktop (7.143rem) */
 }
 
 html, body {
-  /* GUARDRAIL FATALE: MAI overflow-hidden qui. Rompe pin/sticky. */
+  /* GUARDRAIL FATALE: MAI overflow-hidden qui. */
   background-color: var(--color-base);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
   background-color: var(--color-accent);
-  color: var(--color-base);
+  color: #ffffff;
 }
 
 .font-display { font-family: var(--font-display); }

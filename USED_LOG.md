@@ -6,4 +6,4 @@ aggiorna DOPO. Scegli sempre qualcosa di diverso dalle ultime 2-3 voci.
 
 | Data | Sito (ristorante) | Reference usato | Macro-architettura | Note qualità |
 |------|-------------------|-----------------|--------------------|--------------|
-| —    | (ancora nessuno)  | —               | —                  | —            |
+| 2026-06-20 | Radici (demo) | #01 BEC | verticale, medias-text sticky asimmetrico | build OK; identità sostituibile; immagini placeholder |
