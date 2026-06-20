@@ -1,318 +1,272 @@
-# STRATEGIA — Siti ristorante di qualità Michelin (clonazione fedele)
+# STRATEGIA MASTER — Siti ristorante di livello Michelin
 
 > **Regola zero, sopra ogni altra: la qualità è la cosa più importante.**
-> Niente siti grezzi. Niente template generici. Solo fedeltà a Michelin reali.
+> Niente siti grezzi. Niente template generici. Pari livello ai Michelin reali.
+
+Documento unico e completo. Per le regole tecniche operative vedi `AGENTS.md`;
+per i prompt vedi `prompts/`.
+
+## Indice
+1. Il principio che regge tutto
+2. Copia o arte? (strato invisibile/visibile, 4 livelli, manopole)
+3. Il capitale: i tuoi asset e i loro ruoli
+4. Clona intero vs ricombina
+5. Cosa si clona fresco e cosa si riusa
+6. Il modello a ricombinazione (il lavoro vero)
+7. Il workflow completo (fasi + cancelli)
+8. Assegnazione degli strumenti
+9. Regole come codice (anti-bug)
+10. Memoria su file (varietà)
+11. Architettura della repo
+12. Stato attuale (cosa è già fatto)
+13. Priorità e percorso
+14. Le frasi chiave
 
 ---
 
 ## 1. Il principio che regge tutto
 
-**L'IA non disegna MAI. L'IA clona uno dei siti Michelin scaricati.**
+**L'IA non disegna MAI.** Ogni volta che inventa un layout regredisce verso la
+sua media — e la sua media è il template premium-generico. È matematico: più
+invenzione = più grezzo.
 
-Il motivo per cui finora uscivano siti grezzi è uno solo: ogni volta che l'IA
-*inventa* un layout, regredisce verso la sua media — e la sua media è il
-template premium-generico. Non è un difetto risolvibile col prompt: è
-matematico. Più invenzione = più grezzo.
-
-La soluzione è togliere all'IA il permesso di inventare:
-
-- La **qualità non viene generata dall'IA** → viene **ereditata** dal sito
-  Michelin che si clona.
-- L'IA non è la fonte della qualità. **Il sito reference è la fonte.** L'IA è
-  solo il braccio che lo trascrive fedele.
-- Finché l'IA *trascrive* invece di *inventare*, è impossibile che il
-  risultato sia più grezzo della fonte.
-
-**Corollario operativo:** dove l'IA dovrebbe inventare qualcosa, si FERMA e
-chiede. Non riempie mai un vuoto con la sua media. È lì che nasce il grezzo.
+Quindi le si toglie il permesso di inventare:
+- La qualità **non è generata** dall'IA: è **ereditata** dalle fonti (siti
+  Michelin, componenti vetted).
+- L'IA è il **braccio** che trascrive/compone pezzi di alto livello, non la testa.
+- **Corollario:** dove dovrebbe inventare, l'IA si FERMA e chiede. Non riempie
+  mai un vuoto con la sua media — è lì che nasce il grezzo.
 
 ---
 
-## 1-bis. "Saranno copie esatte?" — NO. Cosa si clona e cosa no
+## 2. Copia o arte? — "saranno copie esatte?" NO
 
-Si clona lo **scheletro**, non il **vestito**. Un sito ha due strati:
+### Strato invisibile vs strato visibile
+- **Invisibile (si clona/condivide):** griglia, proporzioni, ritmo, asimmetria,
+  *tecniche* di animazione. È il DNA compositivo, l'intelligenza del design.
+- **Visibile (si sostituisce al 100%):** foto, testi, colori, font, nome, piatti.
+  È l'identità, e diventa quella del ristorante.
 
-- **Strato invisibile (si CLONA):** griglia, proporzioni, ritmo dello spazio,
-  asimmetria, *tecniche* di animazione (clip-path reveal, scale-scrub). È il
-  **DNA compositivo** — l'intelligenza che rende un sito Michelin e non grezzo.
-- **Strato visibile (si SOSTITUISCE al 100%):** foto, testi, colori, font,
-  nome, piatti. È l'**identità**, e diventa quella del ristorante.
+→ Il risultato ha lo scheletro geniale ma un **aspetto completamente diverso**.
+Si copia il **mestiere** Michelin, non l'aspetto (come un musicista che impara
+gli accordi di un capolavoro e scrive una SUA canzone).
 
-→ Il risultato ha lo scheletro geniale del reference ma un **aspetto
-completamente diverso.** Chi conosce l'originale non lo riconosce, perché tutto
-ciò che si *vede* è cambiato. Si copia il **mestiere** Michelin, non l'aspetto.
-(Come un musicista che studia gli accordi di un capolavoro e scrive una SUA
-canzone — non copia la canzone, copia il mestiere.)
+### I 4 livelli di originalità
+- **L1 — Copia esatta.** Cloni un sito, cambi i testi. Qualità garantita ma copia.
+  Il pavimento / la prova.
+- **L2 — Copia rivestita.** Reference diverso per ogni cliente + sue foto/colori/font.
+  Sweet spot commerciale: per il cliente è su misura.
+- **L3 — ARTE: ricombinazione diretta da te.** Backbone da A + sezione da B +
+  componente da C + identità del ristorante. Mai esistito, fatto al 100% di
+  materiale altissimo. **Il lavoro vero.**
+- **L4 — LA TRAPPOLA.** "IA, fai qualcosa di artistico" + libertà → grezzo. Vietato.
 
-### Le manopole dell'originalità (le decide l'utente)
+**Regola d'oro:** la differenza tra Frankenstein (L4) e arte (L3) non è
+*combinare*, è **chi dirige**. IA alla cieca → grezzo. Utente che dirige + IA
+che esegue con pezzi blindati → arte. **Il soffitto di qualità è il tuo gusto,
+non l'immaginazione dell'IA.**
+
+### Le manopole dell'originalità (le decidi tu)
 | Manopola | Effetto |
 |---|---|
 | Contenuti (sempre) | testi/piatti propri |
 | **Fotografia (sempre)** | driver visivo #1: cambia le foto → sembra un altro sito |
-| Palette colori (opz.) | cambio colori → irriconoscibile |
-| Font (opz.) | es. PPWoodland del BEC → font propri |
-| N. di sorgenti | 1 = vicino a copia · più siti combinati = originale (Livello 3) |
+| Palette (opz.) | cambio colori → irriconoscibile |
+| Font (opz.) | cambio famiglie → altro carattere |
+| N. di fonti | 1 = vicino a copia · più fonti = originale (L3) |
 
 ---
 
-## 1-ter. I 4 livelli di originalità (dal copia all'arte)
+## 3. Il capitale: i tuoi asset e i loro ruoli
 
-Il metodo NON tappa a "copie esatte": scala dalla copia sicura all'arte
-diretta dall'utente, senza mai passare dal grezzo.
+Gli strumenti AI sono **manodopera** (bravi, sostituibili, smemorati). I tuoi
+asset sono **capitale**. La strategia ruota attorno a una mossa: trasformare il
+capitale grezzo (cartelle locali) in **capitale lavorato** (libreria pulita,
+riusabile), una volta sola — non far rilavorare la manodopera da zero ogni volta.
 
-- **Livello 1 — Copia esatta.** Cloni un sito, cambi i testi. Qualità
-  garantita ma è una copia. Il *pavimento*, la rete di sicurezza.
-- **Livello 2 — Copia rivestita (sweet spot commerciale).** Un reference
-  diverso per ogni cliente + sue foto/colori/font. Per il cliente è su misura:
-  nessuno vede lo stesso sito di un altro.
-- **Livello 3 — ARTE: ricombinazione diretta dall'utente.** Scheletro del
-  sito A + interludio del sito B + tipografia del sito C + anima del ristorante.
-  Ogni pezzo è Michelin-grade; la **composizione è la visione dell'utente**.
-  Sito mai esistito, fatto al 100% di materiale altissimo. Arte interattiva vera.
-- **Livello 4 — LA TRAPPOLA.** "IA, fai qualcosa di artistico" + libertà →
-  regressione alla media → grezzo. Da evitare sempre.
-
-**La regola d'oro:** la differenza tra Frankenstein (L4) e arte (L3) non è
-*combinare*, è **chi dirige**. Se combina l'IA alla cieca → grezzo. Se dirige
-l'utente e l'IA esegue con pezzi già blindati → arte. **L'IA non è l'artista
-(regredisce alla media): è le mani perfette di un artista (l'utente).** Il
-soffitto di qualità è il gusto dell'utente, non l'immaginazione dell'IA.
-
-**Il percorso conta:** prima cloni fedele (L1-2) e padroneggi i 37, POI ti
-guadagni la ricombinazione (L3). Chi salta all'arte senza aver incassato i
-mattoni Michelin ricade nel Frankenstein (L4). L'invenzione sta SOLO al livello
-della composizione (dell'utente, approvata al cancello del wireframe); ogni
-pezzo resta fedele e Michelin-grade.
-
----
-
-## 2. Il capitale: 37 siti Michelin animati
-
-I 37 siti scaricati (ristoranti Michelin, interattivi e animati) **sono il
-vero valore.** Gli strumenti AI (Stitch, Hula, Jules, Antigravity, Codex)
-sono manodopera: bravi ma sostituibili e smemorati. I 37 siti sono capitale:
-roba che nessun altro ha.
-
-Errore da non fare più: **tenere il capitale grezzo e far rilavorare la
-manodopera da zero ogni volta.** Si trasforma il capitale grezzo (cartelle
-disordinate) in **capitale lavorato** (blueprint puliti, riutilizzabili),
-una volta sola.
-
-### Cosa contiene un sito scaricato (verificato sul Reference #01, BEC)
-- **Layout/composizione** → nel CSS, leggibile → numeri esatti estraibili
-  (griglia, margini, proporzioni, tipografia). Fedeltà al pixel: facile.
-- **Animazioni/interazioni** → nel JS. Se leggibile (come BEC: GSAP +
-  ScrollTrigger + SplitText + Lenis, non minificato) → estraibili. Se
-  minificato → si studia il *comportamento* e si riproduce pulito.
-
----
-
-## 3. Clona INTERO, non mescolare (anti-Frankenstein)
-
-Il vecchio metodo "Roulette" prendeva uno **scheletro** da un sito + una
-**animazione random** da un Golden Pack separato e li **incollava**. Il
-Frankenstein nasce esattamente lì: saldi un layout fatto da una persona con
-un'animazione fatta da un'altra.
-
-Con 37 siti già animati **non serve incollare niente.** Ogni sito è
-un'unità coerente: **layout + le SUE animazioni native, progettati insieme**
-dagli stessi designer. La coerenza è gratis.
-
-→ **Massima qualità = clonare UN sito Michelin intero** (composizione + le sue
-animazioni native), non mescolare pezzi di mondi diversi. La "Roulette" si fa
-scegliendo *quale dei 37* clonare, non mescolando animazioni a caso.
-
-### E la cartella ANIMAZIONI / Golden Pack?
-I Golden Pack separati passano da protagonisti a **opzione di riserva.** Le
-animazioni native del reference sono sempre la prima scelta (coerenti per
-costruzione). Un Golden Pack si usa SOLO se vuoi un'interazione che il
-reference non ha. In quel caso: si **sanitizza una volta** in un componente
-vetted (CSS sandbox, rem→px, guidato da props) salvato in `/packs-vetted/`, e
-si riusa da lì. **Mai re-estrarre lo stesso pack a ogni sito** — è la fonte #1
-del Frankenstein.
-
----
-
-## 4. Cosa si clona fresco e cosa si riusa
-
-Distinzione fondamentale per non ricadere nel template:
-
-| Elemento | Porta l'identità del design? | Regola |
-|---|---|---|
-| **Layout, composizione, asimmetria, proporzioni** | **SÌ — è l'anima** | **Clonato fresco dal reference, ogni volta, al pixel.** Mai una libreria di layout pre-fatti (sarebbe un nuovo template). |
-| **Motore animazioni (logica GSAP) sanitizzato** | NO — invisibile come "stile" | Riusabile. Riusarlo NON rende generici, perché due layout diversi col solito scrub restano diversi. |
-| **Guardrail anti-bug (CSS sandbox, z-index, overflow)** | NO | Riusabili. Riusarli ALZA la qualità (toglie i bug). |
-
-**Riusare il motore e lo scudo non è "fare un template": è non ri-rompere
-ogni volta lo stesso motore.** L'identità del design sta nel layout, e il
-layout si clona daccapo.
-
----
-
-## 5. Il workflow a due fasi con cancelli di qualità
-
-```
-══ UNA TANTUM, per ogni reference Michelin ══
-  Si trasforma il sito scaricato in un BLUEPRINT fedele (vedi Fase A).
-  37 reference → 37 blueprint riproducibili per sempre.
-
-══ PER OGNI SITO NUOVO ══
-
-FASE A — STUDIO FEDELE (un reference alla volta)
-  L'agente legge HTML+CSS+JS del sito scaricato e produce, SENZA scrivere
-  ancora codice del nuovo sito:
-    • composition-spec.md  → numeri VERI letti dal CSS (griglia, proporzioni,
-      spacing, tipografia, gerarchia)
-    • animation-spec.md    → ogni animazione GSAP estratta dal JS (cosa,
-      quando, easing, scrub, pin, clip-path)
-  → Output e STOP.
-
-CANCELLO 1 (Codex / utente)
-  Si verifica che gli spec siano FEDELI, non un riassunto. Si bloccano.
-  Da qui non si interpreta più: si esegue.
-
-FASE B — COSTRUZIONE FEDELE
-  L'agente ricostruisce il layout ESATTAMENTE dallo spec (clone fresco di
-  QUESTA reference) + innesta le animazioni native + i guardrail.
-  Contenuti del ristorante in italiano al posto dei testi originali.
-
-CANCELLO 2 — QA (Codex)
-  FATAL CHECK + confronto FIANCO A FIANCO con lo screenshot/originale.
-  Proporzioni, spacing, animazioni. O combacia o si rifà il pezzo.
-```
-
-Il segreto della qualità è la **Fase A isolata**: quando lo studio è il
-*solo* compito, la precisione non evapora nel sovraccarico cognitivo.
-
----
-
-## 6. Assegnazione degli strumenti (ognuno sul suo punto di forza)
-
-| Tool | Forza unica | Ruolo | NON fargli fare |
-|---|---|---|---|
-| **Antigravity** | Accede alle cartelle LOCALI del Mac (cartella 6) | **Costruttore primario** — l'unico che vede i siti scaricati dove stanno | inventare regole (sono in AGENTS.md) |
-| **Codex** | Code review rigorosa | **Cancello QA** — approva spec, FATAL CHECK finale | costruire |
-| **Jules** | Lavora sulla repo in background | **Operaio repo** — refinement incrementale, deploy | la build creativa iniziale (non vede il locale) |
-| **Stitch / Hula** | Bozze statiche veloci | **Solo** esplorazione mood/varianti, opzionale | la fedeltà compositiva (la danno i reference) |
-
-**Nota chiave:** Antigravity (locale) e Jules (repo) vivono in mondi diversi.
-Per sfruttarli insieme, i blueprint lavorati devono stare **in entrambi**:
-committati nella repo *e* sincronizzati nella cartella locale.
-
----
-
-## 7. Regole come CODICE, non come prosa nel prompt
-
-Ogni regola spostata da "prosa nel prompt" a "codice nella repo" è una regola
-che **non potrà più essere violata** e che **svuota il prompt** (che oggi è
-da 4000 parole → diventa ~12 righe). Vedi `AGENTS.md`. Esempi:
-
-| Regola-prosa (vecchio prompt) | Guardrail-codice |
-|---|---|
-| "MAI overflow-hidden sul root" | ESLint rule che fallisce la build |
-| "rem→px nei pack" | fatto una volta nel pack vetted + check CI |
-| "wrappa il guest in section isolata" | esiste solo `<GuestWrapper>` |
-| "z-index crescenti nei wipe" | componente `<WipeStack>` che li assegna da solo |
-| palette / font / footer | `tailwind.config` + `globals.css` + `<Footer>` fisso |
-
----
-
-## 8. Memoria su file (per la varietà reale)
-
-L'IA è smemorata tra sessioni: la "Roulette" anti-ripetizione **non può
-funzionare nel prompt**. La memoria sta in `USED_LOG.md`:
-il prompt dice *"leggi USED_LOG, scegli un reference + un'architettura non
-presenti nelle ultime 2-3 voci, poi aggiorna il log."* → varietà
-deterministica e verificabile, non affidata alla finta-memoria dell'IA.
-
----
-
-## 9. La qualità si MISURA, non si spera
-
-Il sito finito si mette **fianco a fianco con la reference** e si confronta
-oggettivamente: proporzioni, spacing, animazioni. Non è un'opinione
-("mi sembra bello"): è un match col Michelin originale. **O combacia o non
-passa.** Questo è il cancello che impedisce strutturalmente l'output grezzo.
-
----
-
-## 10. Stato del materiale (aggiornare man mano)
-
-- **Reference #01 — BEC Restaurant** ✅ in repo (`references/01-bec-restaurant/`).
-  Stack verificato: GSAP + ScrollTrigger + SplitText + Lenis, **leggibile**.
-  Tecniche native: clip-path reveal, immagini scale 1.15→1 in scrub.
-  ⚠️ **Immagini:** il download ha preso solo 1 delle 90 immagini (le altre
-  erano URL remoti). Da recuperare, o sostituire con le foto del ristorante
-  mantenendo proporzioni e posizioni.
-- Reference #02–#37 → da caricare e catalogare (vedi `references/INDICE.md`).
-
----
-
-## 11. Priorità operativa (ROI decrescente)
-
-1. **Blueprint del Reference #01** (composition-spec + animation-spec) → prova
-   di fedeltà su materiale vero.
-2. **AGENTS.md + guardrail** → toglie il 70% del prompt e i bug fatali.
-3. **Catalogare i 37** in `INDICE.md` (indice rapido per scegliere il
-   reference giusto per ogni ristorante).
-4. **USED_LOG.md** attivo → varietà reale.
-5. Costruire il primo sito ristorante clonando il #01.
-
----
-
-## 12. EVOLUZIONE: dal clone alla ricombinazione (modello a libreria)
-
-Con l'arsenale reale — **37 siti + 300 screenshot + 50 componenti + librerie
-Framer/GSAP** — la strategia sale di livello: non più "clona un Michelin" ma
-"**componi** Michelin originali da una libreria". Clonare intero (Livello 1)
-resta il pavimento/prova; il lavoro vero è la **ricombinazione (Livello 3)**.
-
-### Due classi di reference, due ruoli, due fedeltà
 | Classe | Cosa sono | Ruolo | Fedeltà |
 |---|---|---|---|
 | **37 siti** (codice) | HTML/CSS/JS veri | donatori di **engine, backbone, animazioni** | clone-grade (pixel dal CSS) |
 | **300 screenshot** | solo immagini | **libreria della varietà** (300 composizioni) | composition-grade (ricostruiti) |
 | **50 componenti + Framer/GSAP** | codice cinetico | **cassetta attrezzi condivisa** (neutra) | vetted 1 volta, riusati sempre |
 
-### I 4 cambiamenti
-1. **Ricombinazione = default.** Backbone da un sito + composizione da uno
-   screen + componenti dai 50 + animazioni dalle librerie + identità dal
-   ristorante. Stesso livello, uguale a nessun originale.
-2. **Gli screenshot sono il motore della varietà.** Non si clonano dal codice
-   (non ce l'hanno): si **misurano dall'immagine e si ricostruiscono** con
-   l'engine. 300 screen = 300 scheletri originali → varietà quasi infinita.
-3. **La cassetta attrezzi condivisa garantisce la qualità.** I 50 componenti +
-   animazioni si normalizzano una volta in componenti vetted (`app/src/components`,
-   `/packs-vetted`) e si riusano ovunque: è il pezzo invisibile che tiene tutti
-   i siti a livello Michelin qualunque composizione scegli.
-4. **Il cancello del wireframe diventa centrale.** Nel clone l'IA non inventa;
-   nella ricombinazione **dirigi tu il mix** — ed è lì che vive il Frankenstein.
-   Quindi: prima la **ricetta** (quale pezzo da dove) → approvazione → poi codice.
-   Regia obbligatoria. Vedi `prompts/RICOMBINAZIONE-livello3.md`.
-
-### Architettura repo (target)
-```
-references/sites/      ← i 37 siti scaricati (codice)
-references/screens/    ← i 300 screenshot (immagini) + INDICE
-components/            ← i 50 componenti (da normalizzare in vetted)
-animations/            ← librerie Framer + GSAP
-app/                   ← il progetto: engine + componenti vetted + sito corrente
-```
-
-### Due flussi di studio (Fase A si sdoppia)
-- **Da sito (codice):** `prompts/FASE-A-studio-fedele.md` → numeri esatti dal CSS.
-- **Da screenshot:** `prompts/FASE-A-screenshot.md` → composition-draft misurato
-  dall'immagine, ricostruito con l'engine (no codice da copiare).
+**Normalizza ogni asset UNA volta sola.** L'errore più costoso è ri-estrarre/
+ri-sanitizzare lo stesso pezzo a ogni sito (ri-introduce gli stessi bug =
+Frankenstein intermittente). Si lavora una volta → si riusa per sempre.
 
 ---
 
-### In una frase (clone)
-**Non far disegnare l'IA. Clona uno dei 37 Michelin INTERO (layout dal CSS al
-pixel + le sue animazioni native), riusa solo motore e scudo anti-bug, studia
-in una fase dedicata e bloccata, e verifica fianco a fianco con l'originale.**
+## 4. Clona intero vs ricombina (anti-Frankenstein)
 
-### In una frase (ricombinazione — il lavoro vero)
-**Non clonare un sito: COMPONI da una libreria. Backbone da un sito, composizione
-da uno screen, pezzi dai 50 componenti, animazioni dalle librerie, identità dal
-ristorante — sotto la TUA regia, con la ricetta approvata prima del codice.
-Stesso livello Michelin, uguale a nessun originale.**
+Il vecchio metodo "Roulette" incollava uno scheletro + un'animazione random:
+il Frankenstein nasce lì (saldare pezzi di mondi diversi).
+
+- **Clone (L1):** cloni UN sito Michelin **intero** — layout + le SUE animazioni
+  native insieme. La coerenza è gratis perché l'hanno progettata gli stessi
+  designer. È la prova / il pavimento.
+- **Ricombinazione (L3):** componi pezzi da fonti diverse, ma **sotto regia** e
+  con **componenti vetted** → coerenza data dalla cassetta attrezzi + dalla
+  ricetta approvata, non dal caso.
+
+---
+
+## 5. Cosa si clona fresco e cosa si riusa
+
+| Elemento | Identità del design? | Regola |
+|---|---|---|
+| Layout, composizione, asimmetria, proporzioni | **SÌ (l'anima)** | clonato/ricostruito fresco dalla fonte, ogni volta. Mai una libreria di layout pre-fatti (sarebbe un template). |
+| Motore animazioni (logica GSAP/Framer) sanitizzato | NO (invisibile) | **riusabile.** Riusarlo non rende generici. |
+| Guardrail anti-bug (CSS sandbox, z-index, overflow) | NO | **riusabili.** Riusarli alza la qualità. |
+
+Riusare engine + scudo **non è fare un template**: è non ri-rompere ogni volta
+lo stesso motore. L'identità sta nel layout, e il layout si fa fresco.
+
+---
+
+## 6. Il modello a ricombinazione (il lavoro vero)
+
+Non si clona un sito: si **compone** da una libreria.
+```
+Backbone / engine       ← da uno dei 37 siti (codice)
+Composizione sezioni    ← da uno o più dei 300 screenshot (misurati)
+Componenti cinetici     ← dai 50 componenti / vetted (per nome)
+Animazioni              ← dalle librerie Framer / GSAP (per nome)
+Palette + font + foto   ← identità del RISTORANTE (diversa dalle fonti)
+```
+Il risultato **non somiglia a nessuna singola fonte** (viene da molte) →
+**stesso livello, zero somiglianza**. Gli screenshot sono il motore della
+varietà: 300 composizioni = 300 scheletri → varietà quasi infinita.
+
+---
+
+## 7. Il workflow completo (fasi + cancelli)
+
+```
+UNA TANTUM — capitale → capitale lavorato
+  • normalizza i 50 componenti + animazioni in componenti VETTED
+  • estrai blueprint dai 37 siti (composition-spec + animation-spec)
+  • indicizza i 300 screenshot (composition-draft on demand)
+
+PER OGNI SITO
+
+  FASE A — STUDIO FEDELE (no codice del sito)
+    • da SITO:       prompts/FASE-A-studio-fedele.md  → numeri esatti dal CSS
+    • da SCREENSHOT: prompts/FASE-A-screenshot.md     → composizione dall'immagine
+    • RICOMBINAZIONE: prompts/RICOMBINAZIONE-livello3.md → la RICETTA (mix di fonti)
+
+  ── CANCELLO 1 (Codex / utente): si verifica/approva lo spec o la ricetta.
+     Da qui non si interpreta più: si esegue. ──
+
+  FASE B — COSTRUZIONE
+    • clona/ricostruisce il layout dallo spec/ricetta
+    • usa i componenti VETTED per le animazioni (non riscrive motori)
+    • applica l'identità del ristorante (token), copy in italiano, asset locali
+
+  ── CANCELLO 2 — QA (Codex): FATAL CHECK + confronto fianco a fianco.
+     Clone: deve combaciare con l'originale.
+     Ricombinazione: NON deve somigliare a nessuna singola fonte. ──
+
+  • aggiorna USED_LOG.md
+```
+Il segreto della qualità è la **Fase A isolata**: quando lo studio è il solo
+compito, la precisione non evapora nel sovraccarico.
+
+---
+
+## 8. Assegnazione degli strumenti
+
+| Tool | Forza unica | Ruolo | NON fargli fare |
+|---|---|---|---|
+| **Antigravity** | accede alle cartelle LOCALI del Mac | **costruttore primario** (vede siti+screen+componenti) | inventare regole (sono in AGENTS.md) |
+| **Codex** | code review rigorosa | **cancello QA** (approva spec/ricetta, FATAL CHECK) | costruire |
+| **Jules** | lavora sulla repo in background | **operaio repo** (normalizza vetted, refinement, deploy) | la build creativa iniziale (non vede il locale) |
+| **Stitch / Hula** | bozze statiche veloci | **solo** esplorazione mood/varianti, opzionale | la fedeltà compositiva |
+
+Antigravity (locale) e Jules (repo) vivono in mondi diversi: i blueprint e i
+componenti vetted devono stare **in entrambi** (committati + sincronizzati).
+
+---
+
+## 9. Regole come codice (anti-bug)
+
+Ogni regola spostata da "prosa nel prompt" a "codice nella repo" non può più
+essere violata e svuota il prompt (da 4000 parole → ~12 righe). Vedi `AGENTS.md`
+e `app/`:
+- ESLint + `app/scripts/check-guardrails.mjs` → fallisce la build se trova
+  `overflow-hidden` su root/main/html/body (bug #1 delle animazioni).
+- `<GuestWrapper>` → unico modo isolato per innestare un pack.
+- `<WipeStack>` → z-index crescenti automatici.
+- `<Footer>` → firma obsidiantech fissa.
+- token in `app/src/index.css` (`@theme`) → palette/font, override per fonte.
+- pin `start:'bottom bottom'` per sezioni >100vh · `invalidateOnRefresh:true`.
+
+---
+
+## 10. Memoria su file (varietà reale)
+
+L'IA è smemorata tra sessioni: la "Roulette" anti-ripetizione **non può vivere
+nel prompt**. La memoria sta in `USED_LOG.md`: l'agente lo legge prima
+(sceglie fonti/architetture diverse dalle ultime voci) e lo aggiorna dopo →
+varietà deterministica e verificabile.
+
+---
+
+## 11. Architettura della repo
+
+```
+STRATEGIA.md           ← questo documento (fonte di verità)
+AGENTS.md              ← regole operative per gli agenti
+USED_LOG.md            ← memoria anti-ripetizione
+prompts/               ← FASE-A (codice), FASE-A (screenshot), FASE-B, RICOMBINAZIONE
+references/sites/      ← i 37 siti scaricati (codice) + blueprint (spec)
+references/screens/    ← i 300 screenshot + composition-draft + INDICE
+components/            ← i 50 componenti (da normalizzare in vetted)
+animations/            ← librerie Framer + GSAP
+app/                   ← progetto React+Vite+Tailwind: engine + vetted + sito corrente
+```
+
+---
+
+## 12. Stato attuale (cosa è già fatto)
+
+- ✅ **Strategia + AGENTS.md + prompt** scritti nella repo.
+- ✅ **Reference #01 (BEC)** caricato + **blueprint completo**
+  (`composition-spec.md` + `animation-spec.md`): griglia 14 col, palette
+  #003250/#fabdb4, font PP Woodland+Manrope, sticky asimmetrico, keyframe hero.
+- ✅ **Scaffolding `app/`**: engine GSAP+Lenis, componenti vetted
+  (KineticImage, RevealText, GuestWrapper, WipeStack, Footer), guardrail come
+  codice **testati**.
+- ✅ **Fase B dimostrata**: sito *Radici* clonato dal BEC, **build verificata**
+  (`npm run build` OK). Identità placeholder, da sostituire.
+- ⏳ Da fare: caricare i 37 siti + 300 screen + 50 componenti; normalizzare i
+  vetted; primo sito **ricombinato** (L3); verifica visiva; deploy.
+
+---
+
+## 13. Priorità e percorso
+
+1. **Caricare gli asset** nella repo (siti, screen, componenti, animazioni):
+   senza, l'agente vede solo il BEC. È lo sblocco #1.
+2. **Normalizzare** 5-10 componenti/animazioni in vetted (una tantum).
+3. **Indicizzare** i 300 screen (INDICE) per scegliere le composizioni.
+4. **Primo sito ricombinato** (L3) → la prova del "pari livello ma diverso".
+5. Verifica visiva fianco a fianco + deploy.
+
+**Il percorso conta:** prima il clone (L1-2) per padroneggiare le fonti, POI la
+ricombinazione (L3). Chi salta all'arte senza incassare i mattoni ricade nel
+Frankenstein (L4).
+
+---
+
+## 14. Le frasi chiave
+
+**Clone:** non far disegnare l'IA — clona un Michelin intero (layout dal CSS +
+animazioni native), riusa solo motore e scudo, studia in fase isolata e bloccata,
+verifica fianco a fianco. La qualità si eredita dalla fonte.
+
+**Ricombinazione (il lavoro vero):** non clonare un sito — COMPONI da una
+libreria. Backbone da un sito, composizione da uno screen, pezzi dai componenti,
+animazioni dalle librerie, identità dal ristorante, sotto la TUA regia con la
+ricetta approvata prima del codice. **Stesso livello Michelin, uguale a nessun
+originale. La qualità viene dalla cassetta attrezzi; l'originalità dal mix; la
+coerenza dalla regia.**
