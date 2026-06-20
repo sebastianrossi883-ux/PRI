@@ -260,8 +260,59 @@ passa.** Questo è il cancello che impedisce strutturalmente l'output grezzo.
 
 ---
 
-### In una frase
+## 12. EVOLUZIONE: dal clone alla ricombinazione (modello a libreria)
+
+Con l'arsenale reale — **37 siti + 300 screenshot + 50 componenti + librerie
+Framer/GSAP** — la strategia sale di livello: non più "clona un Michelin" ma
+"**componi** Michelin originali da una libreria". Clonare intero (Livello 1)
+resta il pavimento/prova; il lavoro vero è la **ricombinazione (Livello 3)**.
+
+### Due classi di reference, due ruoli, due fedeltà
+| Classe | Cosa sono | Ruolo | Fedeltà |
+|---|---|---|---|
+| **37 siti** (codice) | HTML/CSS/JS veri | donatori di **engine, backbone, animazioni** | clone-grade (pixel dal CSS) |
+| **300 screenshot** | solo immagini | **libreria della varietà** (300 composizioni) | composition-grade (ricostruiti) |
+| **50 componenti + Framer/GSAP** | codice cinetico | **cassetta attrezzi condivisa** (neutra) | vetted 1 volta, riusati sempre |
+
+### I 4 cambiamenti
+1. **Ricombinazione = default.** Backbone da un sito + composizione da uno
+   screen + componenti dai 50 + animazioni dalle librerie + identità dal
+   ristorante. Stesso livello, uguale a nessun originale.
+2. **Gli screenshot sono il motore della varietà.** Non si clonano dal codice
+   (non ce l'hanno): si **misurano dall'immagine e si ricostruiscono** con
+   l'engine. 300 screen = 300 scheletri originali → varietà quasi infinita.
+3. **La cassetta attrezzi condivisa garantisce la qualità.** I 50 componenti +
+   animazioni si normalizzano una volta in componenti vetted (`app/src/components`,
+   `/packs-vetted`) e si riusano ovunque: è il pezzo invisibile che tiene tutti
+   i siti a livello Michelin qualunque composizione scegli.
+4. **Il cancello del wireframe diventa centrale.** Nel clone l'IA non inventa;
+   nella ricombinazione **dirigi tu il mix** — ed è lì che vive il Frankenstein.
+   Quindi: prima la **ricetta** (quale pezzo da dove) → approvazione → poi codice.
+   Regia obbligatoria. Vedi `prompts/RICOMBINAZIONE-livello3.md`.
+
+### Architettura repo (target)
+```
+references/sites/      ← i 37 siti scaricati (codice)
+references/screens/    ← i 300 screenshot (immagini) + INDICE
+components/            ← i 50 componenti (da normalizzare in vetted)
+animations/            ← librerie Framer + GSAP
+app/                   ← il progetto: engine + componenti vetted + sito corrente
+```
+
+### Due flussi di studio (Fase A si sdoppia)
+- **Da sito (codice):** `prompts/FASE-A-studio-fedele.md` → numeri esatti dal CSS.
+- **Da screenshot:** `prompts/FASE-A-screenshot.md` → composition-draft misurato
+  dall'immagine, ricostruito con l'engine (no codice da copiare).
+
+---
+
+### In una frase (clone)
 **Non far disegnare l'IA. Clona uno dei 37 Michelin INTERO (layout dal CSS al
 pixel + le sue animazioni native), riusa solo motore e scudo anti-bug, studia
-in una fase dedicata e bloccata, e verifica fianco a fianco con l'originale.
-La qualità si eredita dalla fonte, non si inventa.**
+in una fase dedicata e bloccata, e verifica fianco a fianco con l'originale.**
+
+### In una frase (ricombinazione — il lavoro vero)
+**Non clonare un sito: COMPONI da una libreria. Backbone da un sito, composizione
+da uno screen, pezzi dai 50 componenti, animazioni dalle librerie, identità dal
+ristorante — sotto la TUA regia, con la ricetta approvata prima del codice.
+Stesso livello Michelin, uguale a nessun originale.**
