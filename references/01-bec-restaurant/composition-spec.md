@@ -70,8 +70,20 @@
 3. **`section.o-section.m-menus`** — lista menù (`m-menus_list_item_title`),
    trattamento editoriale a lista, non a card.
 4. **`section.o-section.m-medias-text -multiple`** — blocco asimmetrico
-   testo + immagini multiple (il cuore editoriale).
+   testo + immagini (il cuore editoriale). Dettagli reali:
+   - `_inner`: flex, `align-items: flex-start`, `justify-content: space-between`,
+     gap = gutter. Modificatori `-text-left` / `-text-right` alternano l'ordine
+     (asimmetria **decisa dal markup**, non zigzag automatico).
+   - Blocco immagini `_medias`: largo **5 colonne su 14** (≈36%) desktop,
+     **6/14** sotto i 1199px; **`position: sticky; top: 12vh`** → le immagini
+     restano ferme mentre il testo scorre. Immagini **portrait**,
+     `aspect-ratio: 0.743`. Il testo occupa lo spazio restante.
+   - Mobile (≤699px): blocco sticky nascosto, sostituito da slider orizzontale
+     scroll-snap full-bleed (100vw, margini negativi).
 5. **`section.o-section.m-media -centered`** — immagine dominante centrata.
+   `min-height: 100lvh`, flex centrato. Render largo **6 colonne su 14**
+   desktop (**8/14** ≤1199px, 100% mobile), `aspect-ratio: 1.323` (landscape).
+   Variante `-full` = immagine assoluta a copertura totale.
 6. **`section.o-section.m-newsletter`** + booking (`m-booking_content_title`).
 7. **`footer.o-footer`** — con `footerMenu`.
 
@@ -80,5 +92,6 @@
 - Hero NON è scroll-driven: è nativo, con reveal del testo (vedi animation-spec).
 - Allineamenti su griglia a 14 colonne con margini laterali a 0 su desktop
   (immagini full-bleed possibili fino al bordo).
-- `DA VERIFICARE`: gli span esatti di colonna per ogni blocco di
-  `m-medias-text` (richiede lettura mirata delle regole `.m-medias-text_*`).
+- **Firma compositiva:** colonna immagini stretta e **sticky** (5/14) accanto
+  al testo che scorre, immagini portrait 0.743 → tensione editoriale verticale.
+  La media centrata è invece landscape (1.323), 6/14: contrasto di proporzioni.

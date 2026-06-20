@@ -46,11 +46,18 @@ fromTo(".m-services_backgrounds_item",
   (gestisce `types.words`, `types.lines`, wrapping per riga). Usata per i
   reveal stagger dei titoli e dei paragrafi.
 
-### Hero (modulo Home)
-- Hero **nativo, non scroll-driven**. Sequenza all'avvio (`.-animated`):
-  surtitle fade-in (delay 0.2s), H1 reveal, carosello di sfondi con stato
-  `-active`. (`DA VERIFICARE` i keyframe esatti dell'H1: leggere
-  `.o-home-hero.-animated ... h1` in main.css ~riga 2669.)
+### Hero (modulo Home) — keyframe reali
+- Hero **nativo, non scroll-driven**. Movimento d'ingresso (classe `.-animated`):
+  - **H1:** parte in posizione assoluta in basso a sinistra
+    (`translateY(calc(80lvh - 3rem - 100% - 5lvh))`, `left` = 1ª colonna),
+    e sale alla posizione di riposo con `translateY(0) scale(0.6)`
+    (mobile `scale(0.75)`), `transition: transform 1.4s cubic-bezier(0.19,1,0.22,1)`
+    (ease-out forte, tipo expo). `transform-origin: top left`.
+  - **Surtitle** (`#fabdb4`): fade-in `opacity 0→1`, delay 0.2s.
+  - **Testo** (`_content_txt`): fade-in, delay 0.3s.
+  - **Sfondi** (`_backgrounds`): `translateX(25%)` (slitta laterale) +
+    pannello `::before` che fa wipe `translateX(0)`. Carosello con stato
+    `-active` tra più immagini.
 
 ## Easing e durate ricorrenti
 - Easing: **`power2.inOut`** (immagini), **`power2.out`** (testi a tendina),
