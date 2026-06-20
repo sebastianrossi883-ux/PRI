@@ -64,6 +64,15 @@ dagli stessi designer. La coerenza è gratis.
 animazioni native), non mescolare pezzi di mondi diversi. La "Roulette" si fa
 scegliendo *quale dei 37* clonare, non mescolando animazioni a caso.
 
+### E la cartella ANIMAZIONI / Golden Pack?
+I Golden Pack separati passano da protagonisti a **opzione di riserva.** Le
+animazioni native del reference sono sempre la prima scelta (coerenti per
+costruzione). Un Golden Pack si usa SOLO se vuoi un'interazione che il
+reference non ha. In quel caso: si **sanitizza una volta** in un componente
+vetted (CSS sandbox, rem→px, guidato da props) salvato in `/packs-vetted/`, e
+si riusa da lì. **Mai re-estrarre lo stesso pack a ogni sito** — è la fonte #1
+del Frankenstein.
+
 ---
 
 ## 4. Cosa si clona fresco e cosa si riusa

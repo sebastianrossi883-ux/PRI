@@ -38,6 +38,17 @@ npm install gsap @gsap/react framer-motion lenis tailwindcss @tailwindcss/vite l
    `useGSAP` istanziati SINCRONI. Mai dietro `await`. Preload immagini DOPO
    aver inizializzato GSAP.
 6. **Asset pre-flight:** tutti gli `img src` puntano a asset locali esistenti.
+7. **Pin di sezioni alte:** se la sezione pinnata è più alta di `100vh`, usa
+   `start: 'bottom bottom'` (non `top top`), o il fondo viene tagliato prima
+   del wipe.
+8. **Anti-stuttering:** immagini in parallasse/scrub con
+   `invalidateOnRefresh: true`.
+
+## Micro-interazioni
+Ogni elemento cliccabile/hoverable deve reagire (cursore magnetico, magnetic
+button, transizione GSAP leggera). **Clona le micro-interazioni del reference**
+se le ha (es. BEC ha un cursore custom). Usa Framer Motion solo qui, mai per
+scroll-linked.
 
 ## Hero e Guest
 - **Hero sempre nativo** (full screen + GSAP text reveal). MAI un componente
