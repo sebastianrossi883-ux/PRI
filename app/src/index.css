@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+  DESIGN TOKENS
+  Default = AGENTS.md (alabastro). PER SITO: sostituisci questi valori con
+  quelli del composition-spec del reference scelto.
+  Esempio Reference #01 (BEC) è commentato sotto.
+*/
+@theme {
+  --color-base: #ecebe8;     /* BEC: #FFFFFF  */
+  --color-ink: #1c1b1a;      /* BEC: #003250  */
+  --color-accent: #b9a37e;   /* BEC: #fabdb4  */
+
+  --font-display: "PP Woodland", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  /* Scala di spaziatura editoriale (override per reference). */
+  --space-xs: 10px;
+  --space-sm: 20px;
+  --space-md: 40px;
+  --space-lg: 80px;
+  --space-xl: 120px;
+  --section-padding: 100px; /* BEC desktop */
+}
+
+html, body {
+  /* GUARDRAIL FATALE: MAI overflow-hidden qui. Rompe pin/sticky. */
+  background-color: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-base);
+}
+
+.font-display { font-family: var(--font-display); }
