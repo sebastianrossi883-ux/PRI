@@ -46,15 +46,16 @@ export default function Hero() {
       className="relative flex min-h-screen flex-col justify-end overflow-hidden px-[8vw] pb-[12vh]"
     >
       {/* sfondo (overflow-hidden è SUL figlio, consentito) */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 z-0">
         <img
           src="/images/hero.jpg"
           alt=""
           className="hero-bg h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-[#003250]/35" />
+        <div className="absolute inset-0 bg-[#003250]/45" />
       </div>
 
+      <div className="relative z-10">
       <p className="hero-fade font-sans text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-accent)]">
         Cucina italiana contemporanea — dal 1987
       </p>
@@ -65,6 +66,7 @@ export default function Hero() {
         Una tavola che racconta la terra, le stagioni e la memoria. Nel cuore
         delle colline, dove ogni piatto ha una radice.
       </p>
+      </div>
     </header>
   )
 }
