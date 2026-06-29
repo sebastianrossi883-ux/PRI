@@ -1,66 +1,33 @@
 @import "tailwindcss";
 
-/*
-  FONT REALI del Reference #01 (BEC).
-  NB licenza: "PP Woodland" è un font commerciale (Pangram Pangram). Per la
-  produzione serve licenza, oppure sostituire con un serif simile free
-  (es. "Fraunces" / "Cormorant"). Qui usato per fedeltà al reference.
-*/
-@font-face {
-  font-family: "PP Woodland";
-  src: url("/fonts/PPWoodland-Light.woff2") format("woff2");
-  font-weight: 300; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "PP Woodland";
-  src: url("/fonts/PPWoodland-Regular.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "PP Woodland";
-  src: url("/fonts/PPWoodland-Medium.woff2") format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Manrope";
-  src: url("/fonts/Manrope-Light.woff2") format("woff2");
-  font-weight: 300; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Manrope";
-  src: url("/fonts/Manrope-Regular.woff2") format("woff2");
-  font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "Manrope";
-  src: url("/fonts/Manrope-Medium.woff2") format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
+/* FONT reali del reference (BEC). Licenza PP Woodland: commerciale. */
+@font-face { font-family:"PP Woodland"; src:url("/fonts/PPWoodland-Light.woff2") format("woff2"); font-weight:300; font-display:swap; }
+@font-face { font-family:"PP Woodland"; src:url("/fonts/PPWoodland-Regular.woff2") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"PP Woodland"; src:url("/fonts/PPWoodland-Medium.woff2") format("woff2"); font-weight:500; font-display:swap; }
+@font-face { font-family:"Manrope"; src:url("/fonts/Manrope-Light.woff2") format("woff2"); font-weight:300; font-display:swap; }
+@font-face { font-family:"Manrope"; src:url("/fonts/Manrope-Regular.woff2") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Manrope"; src:url("/fonts/Manrope-Medium.woff2") format("woff2"); font-weight:500; font-display:swap; }
 
 /*
-  DESIGN TOKENS — clonati dal composition-spec del Reference #01 (BEC).
+  TEMA CINEMATOGRAFICO (scuro, caldo, drammatico).
+  Direzione: editoriale dei reference, ma spinta a WOW. Niente lenzuolo bianco.
 */
 @theme {
-  --color-base: #ffffff;     /* BEC: sfondo bianco */
-  --color-ink: #003250;      /* BEC: blu petrolio (ink dominante) */
-  --color-accent: #fabdb4;   /* BEC: salmone (sovratitoli, selezione) */
+  --color-base: #0c0b0a;     /* near-black caldo */
+  --color-ink: #efe7dc;      /* off-white caldo (testo) */
+  --color-accent: #c8743e;   /* terracotta */
+  --color-deep: #161311;     /* sezioni alternate */
 
-  --font-display: "PP Woodland", Georgia, "Times New Roman", serif;
-  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-display: "PP Woodland", Georgia, serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
 }
 
 :root {
-  /* Scala di spaziatura reale del BEC */
-  --space-xs: 10px;
-  --space-sm: 20px;
-  --space-md: 40px;
-  --space-lg: 80px;
-  --space-xl: 120px;
-  --section-padding: 100px; /* BEC desktop (7.143rem) */
+  --section-padding: clamp(80px, 14vh, 180px);
 }
 
 html, body {
-  /* GUARDRAIL FATALE: MAI overflow-hidden qui. */
+  /* GUARDRAIL: mai overflow-hidden qui. */
   background-color: var(--color-base);
   color: var(--color-ink);
   font-family: var(--font-sans);
@@ -68,9 +35,17 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-::selection {
-  background-color: var(--color-accent);
-  color: #ffffff;
-}
+::selection { background-color: var(--color-accent); color: #0c0b0a; }
 
 .font-display { font-family: var(--font-display); }
+
+/* maschera per i reveal cinematografici dei titoli */
+.line-mask { overflow: hidden; display: block; }
+
+/* grana/vignetta leggera per profondità cinematografica */
+.cine-grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% 0%, transparent 50%, rgba(0,0,0,.55) 100%);
+  mix-blend-mode: multiply;
+}

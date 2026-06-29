@@ -1,41 +1,40 @@
 import { useRef } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(useGSAP)
+gsap.registerPlugin(useGSAP, ScrollTrigger)
 
 /*
-  HERO — nativo, a tutto schermo (clone della o-home-hero del BEC).
-  Movimento d'ingresso fedele allo spec: H1 sale dal basso e scala,
-  transition 1.4s cubic-bezier(0.19,1,0.22,1); surtitle e testo in fade ritardato.
-  Mai scroll-driven: è una hero nativa.
+  HERO cinematografico: immagine full-bleed con zoom lento, titolo enorme
+  che sale lettera per lettera da una maschera, gradiente drammatico.
+  Al scroll l'immagine fa parallasse e il titolo si stacca.
 */
+const TITLE = 'Radici'.split('')
+
 export default function Hero() {
   const scope = useRef(null)
 
   useGSAP(
     () => {
-      const ease = 'expo.out' // ~cubic-bezier(0.19,1,0.22,1)
-      gsap.from('.hero-h1', {
-        yPercent: 60,
-        scale: 1.12,
-        opacity: 0,
-        duration: 1.4,
-        ease,
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
+      tl.from('.hero-bg', { scale: 1.2, duration: 2.2, ease: 'power2.out' }, 0)
+        .from('.hero-char', { yPercent: 120, duration: 1.3, stagger: 0.07 }, 0.3)
+        .from('.hero-fade', { opacity: 0, y: 24, duration: 1, stagger: 0.12 }, 0.9)
+        .from('.hero-cue', { opacity: 0, duration: 1 }, 1.4)
+
+      // parallasse + dissolvenza al scroll
+      gsap.to('.hero-bg', {
+        yPercent: 22,
+        ease: 'none',
+        scrollTrigger: { trigger: scope.current, start: 'top top', end: 'bottom top', scrub: true },
       })
-      gsap.from('.hero-fade', {
-        opacity: 0,
-        y: 16,
-        duration: 0.8,
-        stagger: 0.15,
-        delay: 0.4,
-        ease: 'power2.out',
+      gsap.to('.hero-inner', {
+        yPercent: -18,
+        opacity: 0.2,
+        ease: 'none',
+        scrollTrigger: { trigger: scope.current, start: 'top top', end: 'bottom top', scrub: true },
       })
-      gsap.fromTo(
-        '.hero-bg',
-        { scale: 1.15 },
-        { scale: 1, duration: 2, ease: 'power2.out' },
-      )
     },
     { scope },
   )
@@ -43,29 +42,32 @@ export default function Hero() {
   return (
     <header
       ref={scope}
-      className="relative flex min-h-screen flex-col justify-end overflow-hidden px-[8vw] pb-[12vh]"
+      className="cine-grain relative flex min-h-screen flex-col justify-end overflow-hidden px-[6vw] pb-[10vh]"
     >
-      {/* sfondo (overflow-hidden è SUL figlio, consentito) */}
       <div className="absolute inset-0 z-0">
-        <img
-          src="/images/hero.jpg"
-          alt=""
-          className="hero-bg h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-[#003250]/45" />
+        <img src="/images/hero.jpg" alt="" className="hero-bg h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0b0a] via-[#0c0b0a]/40 to-[#0c0b0a]/30" />
       </div>
 
-      <div className="relative z-10">
-      <p className="hero-fade font-sans text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-accent)]">
-        Cucina italiana contemporanea — dal 1987
-      </p>
-      <h1 className="hero-h1 font-display mt-4 text-[clamp(72px,16vw,220px)] font-light leading-[0.92] text-white">
-        Radici
-      </h1>
-      <p className="hero-fade mt-6 max-w-[34ch] font-sans text-base font-light leading-relaxed text-white/85">
-        Una tavola che racconta la terra, le stagioni e la memoria. Nel cuore
-        delle colline, dove ogni piatto ha una radice.
-      </p>
+      <div className="hero-inner relative z-10">
+        <p className="hero-fade font-sans text-[11px] uppercase tracking-[0.35em] text-[color:var(--color-accent)]">
+          Cucina italiana contemporanea — dal 1987
+        </p>
+        <h1 className="font-display mt-3 flex font-light leading-[0.85] text-[color:var(--color-ink)] text-[clamp(96px,22vw,300px)]">
+          {TITLE.map((c, i) => (
+            <span key={i} className="line-mask">
+              <span className="hero-char inline-block">{c}</span>
+            </span>
+          ))}
+        </h1>
+        <p className="hero-fade mt-8 max-w-[40ch] font-sans text-lg font-light leading-relaxed text-[color:var(--color-ink)]/75">
+          Una tavola che racconta la terra, le stagioni e la memoria. Nel cuore
+          delle colline, dove ogni piatto ha una radice.
+        </p>
+      </div>
+
+      <div className="hero-cue absolute bottom-8 left-1/2 z-10 -translate-x-1/2 font-sans text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-ink)]/50">
+        Scorri
       </div>
     </header>
   )
