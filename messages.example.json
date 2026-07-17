@@ -1,10 +1,20 @@
 [
-  "Salve, parlo con {nome}? Sono uno studente e vi contatto per [MOTIVO]. Avreste un minuto?",
-  "Buongiorno, parlo con {nome}? Sono uno studente, avrei una domanda su [MOTIVO]. Posso disturbarvi un attimo?",
-  "Salve, sono uno studente. Parlo con {nome}? Vi scrivo per [MOTIVO], avreste un momento?",
-  "Buongiorno {nome}, sono uno studente e vorrei chiedervi una cosa su [MOTIVO]. Grazie in anticipo!",
-  "Salve, parlo con {nome}? Sono uno studente e sto raccogliendo qualche informazione su [MOTIVO]. Potreste aiutarmi?",
-  "Buongiorno, sono uno studente. Parlo con {nome}? Avrei bisogno di un'informazione riguardo [MOTIVO].",
-  "Salve {nome}, sono uno studente e vi contatto per [MOTIVO]. Avreste un minuto per me?",
-  "Buongiorno, parlo con {nome}? Sono uno studente, le ruberei giusto un minuto per [MOTIVO]."
+  "Salve, parlo con {nome}? Sono uno studente, avreste un minuto?",
+  "Buongiorno, parlo con {nome}? Sono uno studente, posso disturbarvi un attimo?",
+  "Salve, sono uno studente. Parlo con {nome}? Avreste un momento?",
+  "Buongiorno {nome}, sono uno studente. Avrei una cosa da chiedervi, avete un minuto?",
+  "Salve, parlo con {nome}? Sono uno studente, le ruberei giusto un minuto.",
+  "Buongiorno, sono uno studente. Parlo con {nome}? Posso farvi una domanda?",
+  "Salve {nome}, sono uno studente. Avreste un attimo di tempo per me?",
+  "Buongiorno, parlo con {nome}? Sono uno studente e vorrei chiedervi una cosa.",
+  "Salve, sono uno studente. Sto scrivendo a {nome}, avreste un minuto?",
+  "Buongiorno {nome}, sono uno studente. Vi disturbo un attimo?",
+  "Salve, parlo con {nome}? Sono uno studente, potreste aiutarmi un momento?",
+  "Buongiorno, sono uno studente. Parlo con {nome}? Avrei giusto una domanda veloce.",
+  "Salve {nome}, sono uno studente e mi permetto di scrivervi. Avete un minuto?",
+  "Buongiorno, parlo con {nome}? Sono uno studente, posso rubarvi un attimo?",
+  "Salve, sono uno studente. Parlo con {nome}? Vorrei chiedervi una cosa veloce.",
+  "Buongiorno {nome}, sono uno studente. Sarebbe possibile scambiare due parole?",
+  "Salve, parlo con {nome}? Sono uno studente, avreste un momento libero?",
+  "Buongiorno, sono uno studente e scrivo a {nome}. Posso farvi una domanda al volo?"
 ]
