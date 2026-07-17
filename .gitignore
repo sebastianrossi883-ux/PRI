@@ -1,0 +1,8 @@
+node_modules/
+.wa-session/
+state.json
+config.json
+clients.json
+messages.json
+*.log
+.DS_Store

@@ -1,0 +1,48 @@
+{
+  "_commento": "Copia questo file in config.json e modifica i valori. Gli orari sono in formato 24h locale.",
+
+  "finestra": {
+    "_commento": "Fascia oraria in cui il bot puo' inviare messaggi.",
+    "oraInizio": "07:00",
+    "oraFine": "20:00"
+  },
+
+  "avvioGiornaliero": {
+    "_commento": "ORARIO DI PARTENZA random: il bot NON parte sempre alla stessa ora. Ogni giorno parte a 'oraInizio' + un ritardo casuale tra 'ritardoMinMinuti' e 'ritardoMaxMinuti'. Con 20-60 e oraInizio 07:00 parte tra le 07:20 e le 08:00.",
+    "ritardoMinMinuti": 20,
+    "ritardoMaxMinuti": 60
+  },
+
+  "invii": {
+    "_commento": "Messaggi al giorno e TEMPO RANDOM TRA UN MESSAGGIO E L'ALTRO (in minuti). Questo e' diverso dal ritardo di partenza qui sopra. Con 40 messaggi e intervallo 12-22 min la giornata dura ~8-14 ore.",
+    "messaggiAlGiorno": 40,
+    "intervalloMinMinuti": 12,
+    "intervalloMaxMinuti": 22,
+    "_notaFinestra": "modalitaFinestra: 'flexible' = rispetta sempre gli intervalli casuali e i messaggiAlGiorno, l'orario di FINE galleggia (se parti tardi finisci tardi). 'strict' = si ferma comunque a oraFine anche se non ha inviato tutti i messaggi.",
+    "modalitaFinestra": "flexible"
+  },
+
+  "antiBan": {
+    "_commento": "Simulazione 'sto scrivendo' e piccole pause casuali per sembrare umani.",
+    "simulaScrittura": true,
+    "velocitaScritturaCaratteriAlSecondo": 6,
+    "tempoScritturaMinSecondi": 3,
+    "tempoScritturaMaxSecondi": 12,
+    "segnaComeLetto": true,
+    "pausaCasualePrimaInvioMinSecondi": 2,
+    "pausaCasualePrimaInvioMaxSecondi": 8
+  },
+
+  "file": {
+    "clienti": "clients.json",
+    "messaggi": "messages.json",
+    "stato": "state.json"
+  },
+
+  "openwa": {
+    "_commento": "Opzioni passate a @open-wa/wa-automate. sessionId identifica la sessione WhatsApp salvata.",
+    "sessionId": "clienti",
+    "headless": true,
+    "cartellaSessione": "./.wa-session"
+  }
+}

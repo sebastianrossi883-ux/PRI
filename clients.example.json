@@ -1,0 +1,17 @@
+[
+  {
+    "nome": "Mario Rossi",
+    "numero": "393401234567",
+    "attivo": true
+  },
+  {
+    "nome": "Giulia Bianchi",
+    "numero": "393337654321",
+    "attivo": true
+  },
+  {
+    "nome": "Cliente Esempio",
+    "numero": "393281112233",
+    "attivo": false
+  }
+]
