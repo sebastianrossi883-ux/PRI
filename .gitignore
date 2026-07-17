@@ -1,5 +1,6 @@
 node_modules/
 .wa-session/
+.baileys-auth/
 state.json
 config.json
 clients.json
@@ -10,3 +11,9 @@ report.csv
 pausa
 *.log
 .DS_Store
+
+# managed by open-wa
+**.data.json
+**.node-persist**
+**_IGNORE_**
+# end managed by open-wa

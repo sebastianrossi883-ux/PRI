@@ -48,6 +48,43 @@ aver mandato tutti e 40, imposta `modalitaFinestra: "strict"`.
 > una giornata (40 × 50 min ≈ 33 ore). In quel caso riduci `messaggiAlGiorno` o
 > gli intervalli.
 
+## Motore: Baileys (senza browser) o OpenWA
+
+Il bot può parlare con WhatsApp in due modi, scegli in `config.json` con `motore`:
+
+- **`baileys`** (consigliato per un server): niente browser, leggero, e supporta il
+  **proxy** (IP dedicato). Ideale su AWS/Oracle.
+- **`openwa`**: usa un browser Chromium. Più pesante, va bene in locale.
+
+### Proxy (con Baileys)
+Su un server **datacenter (AWS, Oracle, ecc.)** l'IP è "da datacenter": WhatsApp
+non si fida e **banna in fretta**. Per questo, quando giri su un server, devi far
+uscire la connessione da un **IP residenziale/ISP dedicato** tramite proxy.
+
+In `config.json`:
+```json
+"motore": "baileys",
+"baileys": {
+  "cartellaSessione": "./.baileys-auth",
+  "proxyUrl": "http://utente:password@host:porta"
+}
+```
+- Consigliato: **IPRoyal ISP static**, 1 IP dedicato **per numero**, geolocalizzato
+  in **Italia**, non rotante. Formati supportati: `http://…` o `socks5://…`.
+- In **locale sulla tua rete di casa** puoi lasciare `proxyUrl` vuoto (il tuo IP
+  residenziale va bene). Su un server **no**: metti sempre il proxy.
+
+### Dove farlo girare (senza PC acceso)
+Il motore deve stare su una macchina **sempre accesa**:
+- **AWS EC2** (col credito), **Oracle Cloud** (VM gratis per sempre) o un VPS.
+- ⚠️ AWS va benissimo per **far girare il programma**, ma **non** usare il suo IP
+  per WhatsApp: instrada sempre tramite il **proxy** (vedi sopra).
+- Tienilo attivo con `pm2` (vedi più giù).
+
+> Nota architettura: Supabase e Lovable sono *serverless* e **non** possono tenere
+> aperta la connessione WhatsApp. Il motore (Baileys) gira sul server; Supabase/
+> Lovable, se li aggiungi, servono solo come database e pannello di controllo.
+
 ## Requisiti
 
 - Node.js 18+ (testato su Node 22)

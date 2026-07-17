@@ -1,6 +1,15 @@
 {
   "_commento": "Copia questo file in config.json e modifica i valori. Gli orari sono in formato 24h locale.",
 
+  "motore": "baileys",
+  "_commentoMotore": "'baileys' = senza browser, leggero, con proxy (consigliato su server AWS/Oracle). 'openwa' = con browser Chromium.",
+
+  "baileys": {
+    "_commento": "Impostazioni motore Baileys. proxyUrl: IP dedicato per questo numero (IPRoyal ISP static, Italia). Formati: http://utente:password@host:porta oppure socks5://utente:password@host:porta. Lascia vuoto SOLO in locale sulla tua rete di casa; su un datacenter (AWS/Oracle) senza proxy rischi il ban.",
+    "cartellaSessione": "./.baileys-auth",
+    "proxyUrl": ""
+  },
+
   "prefissoInternazionaleDefault": "39",
   "_commentoPrefisso": "Prefisso aggiunto ai numeri che non lo hanno (es. 3401234567 -> 393401234567). Metti stringa vuota per non aggiungerlo.",
 

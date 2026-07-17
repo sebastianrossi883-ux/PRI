@@ -14,14 +14,14 @@ function parseArgs(argv) {
   };
 }
 
-async function creaClientWa(config) {
+async function creaClientOpenWa(config) {
   // Import "lazy": in dry-run non serve nemmeno avere la libreria pronta.
   const { create } = require('@open-wa/wa-automate');
-  log.info('Avvio sessione WhatsApp (scansiona il QR se richiesto)...');
+  log.info('Avvio sessione WhatsApp OpenWA (scansiona il QR se richiesto)...');
   const client = await create({
-    sessionId: config.openwa.sessionId || 'clienti',
-    headless: config.openwa.headless !== false,
-    sessionDataPath: config.openwa.cartellaSessione || './.wa-session',
+    sessionId: (config.openwa && config.openwa.sessionId) || 'clienti',
+    headless: !config.openwa || config.openwa.headless !== false,
+    sessionDataPath: (config.openwa && config.openwa.cartellaSessione) || './.wa-session',
     qrTimeout: 0,
     authTimeout: 0,
     restartOnCrash: true,
@@ -29,6 +29,17 @@ async function creaClientWa(config) {
   });
   log.ok('Sessione WhatsApp pronta.');
   return client;
+}
+
+async function creaClient(config) {
+  const motore = (config.motore || 'openwa').toLowerCase();
+  if (motore === 'baileys') {
+    const { creaClientBaileys } = require('./baileys');
+    log.info('Motore: Baileys (senza browser).');
+    return creaClientBaileys(config);
+  }
+  log.info('Motore: OpenWA (browser).');
+  return creaClientOpenWa(config);
 }
 
 async function main() {
@@ -57,7 +68,7 @@ async function main() {
 
   let client = null;
   if (!args.dryRun) {
-    client = await creaClientWa(config);
+    client = await creaClient(config);
   } else {
     log.warn('MODALITA\' DRY-RUN: nessun messaggio verra\' inviato davvero.');
   }
