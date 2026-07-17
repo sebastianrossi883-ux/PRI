@@ -1,7 +1,12 @@
 [
-  "Ciao {nome}! Ti scrivo per aggiornarti sulle nostre novita' della settimana. Fammi sapere se ti interessa 😊",
-  "Buongiorno {nome}, come stai? Volevo ricordarti la nostra offerta ancora attiva. Se vuoi ti do i dettagli!",
-  "Ehi {nome}! Un saluto veloce da parte nostra. Se hai bisogno di qualcosa siamo qui 👋",
-  "Ciao {nome}, ti va di dare un'occhiata alle ultime proposte? Rispondi pure quando vuoi.",
-  "Salve {nome}! Grazie ancora per la fiducia. Ti aggiorno appena ci sono novita' interessanti."
+  "Salve, parlo con {nome}? Mi chiamo [TUO NOME] e vi contatto per [MOTIVO]. Avreste cortesemente un minuto da dedicarmi?",
+  "Buongiorno, sto scrivendo a {nome}. Sono [TUO NOME]; vorrei sottoporvi brevemente [MOTIVO]. È un buon momento per parlarne?",
+  "Gentile {nome}, buongiorno. Mi chiamo [TUO NOME] e mi permetto di scrivervi in merito a [MOTIVO]. Sarebbe possibile approfondire?",
+  "Salve, parlo con {nome}? Sono [TUO NOME], uno studente, e sto lavorando a [MOTIVO]. Le ruberei solo un minuto, se possibile.",
+  "Buongiorno {nome}, mi chiamo [TUO NOME]. Vi scrivo con cortesia per proporvi [MOTIVO]. A chi potrei rivolgermi per qualche informazione?",
+  "Gentile {nome}, sono [TUO NOME], studente, e sto svolgendo [MOTIVO]. Vi disturberei giusto il tempo di una breve domanda.",
+  "Salve, vi contatto in riferimento a {nome}. Mi chiamo [TUO NOME] e vorrei presentarvi [MOTIVO]. Resto a vostra disposizione per un confronto.",
+  "Buongiorno, parlo con {nome}? Sono [TUO NOME]. Mi piacerebbe illustrarvi brevemente [MOTIVO]: avreste qualche minuto nei prossimi giorni?",
+  "Gentile {nome}, buongiorno. Sono [TUO NOME] e mi rivolgo a voi per [MOTIVO]. Vi ringrazio fin d'ora per la cortese attenzione.",
+  "Salve {nome}, mi chiamo [TUO NOME], sono uno studente e sto raccogliendo informazioni per [MOTIVO]. Potreste dedicarmi un momento, per favore?"
 ]

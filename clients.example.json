@@ -1,16 +1,16 @@
 [
   {
-    "nome": "Mario Rossi",
+    "nome": "Bar Centrale",
     "numero": "393401234567",
     "attivo": true
   },
   {
-    "nome": "Giulia Bianchi",
+    "nome": "Ristorante Da Luigi",
     "numero": "393337654321",
     "attivo": true
   },
   {
-    "nome": "Cliente Esempio",
+    "nome": "Officina Rossi",
     "numero": "393281112233",
     "attivo": false
   }

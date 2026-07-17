@@ -81,8 +81,20 @@ npm install
 
    Metti `"attivo": false` per saltare un cliente senza cancellarlo.
 
-3. **`messages.json`** — i template. Usa `{nome}` dove vuoi il nome del cliente.
-   Più template metti, meno ripetitivo (e più sicuro) è l'invio.
+3. **`messages.json`** — i template dei messaggi. Il bot ne sceglie uno a caso
+   a ogni invio, così il testo non è mai identico (più vario = più sicuro).
+
+   Segnaposto disponibili:
+   - `{nome}` → sostituito dal bot col nome dell'attività preso da `clients.json`.
+   - `[TUO NOME]` e `[MOTIVO]` → **da personalizzare a mano tu**, una volta sola,
+     dentro `messages.json` (il bot NON li sostituisce: sono lì perché tu ci
+     metta il tuo nome e il motivo del contatto).
+
+   I template di esempio sono in **registro formale** (dando del "Lei"/"voi"),
+   pensati per rivolgersi ad **attività**, con apertura tipo *"Salve, parlo con
+   {nome}?"*. Alcune varianti ti presentano come **studente**. Tutti hanno lo
+   stesso significato, solo formulato in modo diverso. Modificali pure a piacere,
+   mantenendo qualche variante per non essere ripetitivo.
 
 4. **`config.json`** — orari, numero di messaggi al giorno, intervalli e opzioni
    anti-ban. Ogni campo è commentato in `config.example.json`.
