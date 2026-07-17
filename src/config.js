@@ -2,6 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { importaClienti } = require('./importer');
+const { normalizzaNumero, numeroPlausibile } = require('./phone');
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -28,21 +30,36 @@ function caricaConfig() {
   return cfg;
 }
 
-function caricaClienti(percorso) {
+/**
+ * Carica ed estrae automaticamente nome e numero dal file clienti,
+ * qualunque sia il formato (.json, .csv, .txt, .vcf), normalizzando i numeri.
+ *
+ * @param {string} percorso percorso del file clienti
+ * @param {string} prefissoDefault prefisso internazionale da aggiungere se manca
+ */
+function caricaClienti(percorso, prefissoDefault = '') {
   if (!fs.existsSync(percorso)) {
     throw new Error(`File clienti non trovato: ${percorso}`);
   }
-  const lista = leggiJson(percorso);
-  if (!Array.isArray(lista)) {
-    throw new Error('Il file clienti deve contenere un array JSON.');
+  const grezzi = importaClienti(percorso);
+  if (!Array.isArray(grezzi)) {
+    throw new Error('Impossibile leggere la lista clienti dal file.');
   }
-  return lista
-    .filter((c) => c && c.attivo !== false && c.numero)
-    .map((c) => ({
-      nome: (c.nome || 'cliente').toString().trim(),
-      numero: c.numero.toString().replace(/[^0-9]/g, ''),
-    }))
-    .filter((c) => c.numero.length >= 8);
+
+  const visti = new Set();
+  const clienti = [];
+  for (const c of grezzi) {
+    if (!c || c.attivo === false || !c.numero) continue;
+    const numero = normalizzaNumero(c.numero, prefissoDefault);
+    if (!numeroPlausibile(numero)) continue;
+    if (visti.has(numero)) continue; // niente doppioni
+    visti.add(numero);
+    clienti.push({
+      nome: (c.nome || 'cliente').toString().trim() || 'cliente',
+      numero,
+    });
+  }
+  return clienti;
 }
 
 function caricaMessaggi(percorso) {

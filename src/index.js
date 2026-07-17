@@ -34,7 +34,10 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
 
   const config = caricaConfig();
-  const clienti = caricaClienti(config.file.clientiPath);
+  const clienti = caricaClienti(
+    config.file.clientiPath,
+    config.prefissoInternazionaleDefault || ''
+  );
   const messaggi = caricaMessaggi(config.file.messaggiPath);
   const stato = new Stato(config.file.statoPath);
 

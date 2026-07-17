@@ -1,6 +1,9 @@
 {
   "_commento": "Copia questo file in config.json e modifica i valori. Gli orari sono in formato 24h locale.",
 
+  "prefissoInternazionaleDefault": "39",
+  "_commentoPrefisso": "Prefisso aggiunto ai numeri che non lo hanno (es. 3401234567 -> 393401234567). Metti stringa vuota per non aggiungerlo.",
+
   "finestra": {
     "_commento": "Fascia oraria in cui il bot puo' inviare messaggi.",
     "oraInizio": "07:00",
@@ -34,7 +37,8 @@
   },
 
   "file": {
-    "clienti": "clients.json",
+    "_commento": "Il file clienti puo' essere .json, .csv, .txt o .vcf: il bot estrae automaticamente nome e numero.",
+    "clienti": "clients.csv",
     "messaggi": "messages.json",
     "stato": "state.json"
   },
