@@ -25,15 +25,26 @@
     "modalitaFinestra": "flexible"
   },
 
+  "warmup": {
+    "_commento": "Riscaldamento progressivo del numero: parte con pochi messaggi e cresce ogni giorno. FONDAMENTALE per un numero nuovo. Con iniziali=5 e incremento=5: giorno1=5, giorno2=10, ... fino a messaggiAlGiorno.",
+    "abilitato": true,
+    "messaggiIniziali": 5,
+    "incrementoGiornaliero": 5
+  },
+
   "antiBan": {
-    "_commento": "Simulazione 'sto scrivendo' e piccole pause casuali per sembrare umani.",
+    "_commento": "Simulazione 'sto scrivendo', verifica numero e stop di sicurezza.",
     "simulaScrittura": true,
     "velocitaScritturaCaratteriAlSecondo": 6,
     "tempoScritturaMinSecondi": 3,
     "tempoScritturaMaxSecondi": 12,
     "segnaComeLetto": true,
     "pausaCasualePrimaInvioMinSecondi": 2,
-    "pausaCasualePrimaInvioMaxSecondi": 8
+    "pausaCasualePrimaInvioMaxSecondi": 8,
+    "verificaNumeroWhatsapp": true,
+    "_notaVerifica": "Se true, prima di inviare controlla che il numero sia su WhatsApp e in caso contrario lo salta.",
+    "maxErroriConsecutivi": 5,
+    "_notaErrori": "Dopo questo numero di errori di invio di fila il bot si ferma per la giornata (probabile problema di sessione)."
   },
 
   "file": {

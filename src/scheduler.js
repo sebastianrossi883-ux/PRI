@@ -36,6 +36,24 @@ function intervalloTraMessaggiMs(config) {
 }
 
 /**
+ * Limite di messaggi per il giorno indicato, applicando il warm-up progressivo.
+ * Il primo giorno parte da 'messaggiIniziali' e cresce di 'incrementoGiornaliero'
+ * ogni giorno attivo, senza mai superare 'messaggiAlGiorno'.
+ *
+ * @param {object} config
+ * @param {number} numeroGiorno 1 = primo giorno attivo in assoluto
+ */
+function limiteMessaggiOggi(config, numeroGiorno) {
+  const massimo = config.invii.messaggiAlGiorno ?? 40;
+  const w = config.warmup || {};
+  if (!w.abilitato) return massimo;
+  const iniziali = w.messaggiIniziali ?? 5;
+  const incremento = w.incrementoGiornaliero ?? 5;
+  const limite = iniziali + incremento * Math.max(0, numeroGiorno - 1);
+  return Math.min(massimo, limite);
+}
+
+/**
  * Ciclo giornaliero: attende l'orario di avvio casuale, poi invia i messaggi
  * rispettando la finestra oraria e gli intervalli casuali. Al termine
  * pianifica il giorno successivo.
@@ -106,17 +124,27 @@ class Scheduler {
       return;
     }
 
+    // Limite odierno con warm-up progressivo.
+    const numeroGiorno = this.stato.numeroGiornoAttivo();
+    const limiteOggi = limiteMessaggiOggi(this.config, numeroGiorno);
+    if (this.config.warmup && this.config.warmup.abilitato) {
+      log.info(`Warm-up: giorno ${numeroGiorno}, limite di oggi ${limiteOggi} messaggi.`);
+    }
+
+    const maxErrori = (this.config.antiBan && this.config.antiBan.maxErroriConsecutivi) || 5;
+    let erroriConsecutivi = 0;
+
     let inviati = this.stato.inviatiOggi();
     if (inviati > 0) {
       log.info(`Ripresa: gia' inviati ${inviati} messaggi oggi.`);
     }
 
-    while (this.attivo && inviati < cfg.messaggiAlGiorno) {
+    while (this.attivo && inviati < limiteOggi) {
       const adesso = new Date();
 
       if (modalitaStrict && !this.avviaSubito && adesso >= fineFinestra) {
         log.info(
-          `Finestra terminata (${this.config.finestra.oraFine}). Inviati ${inviati}/${cfg.messaggiAlGiorno} oggi. Riprendo domani.`
+          `Finestra terminata (${this.config.finestra.oraFine}). Inviati ${inviati}/${limiteOggi} oggi. Riprendo domani.`
         );
         return;
       }
@@ -129,26 +157,38 @@ class Scheduler {
       if (esito.ok) {
         this.stato.registraInvio(cliente.numero, totaleClienti);
         inviati += 1;
+        erroriConsecutivi = 0;
+      } else if (esito.skip) {
+        // Numero non su WhatsApp: salto senza contare e senza allarmarmi.
+        this.stato.avanzaCursore(totaleClienti);
+        continue; // passo subito al prossimo, senza attesa lunga
       } else {
-        // In caso di errore avanza comunque il cursore per non bloccarsi
-        // sullo stesso cliente problematico.
-        this.stato.registraInvio(cliente.numero, totaleClienti);
+        // Errore di invio: avanzo il cursore e tengo il conto degli errori.
+        this.stato.avanzaCursore(totaleClienti);
+        erroriConsecutivi += 1;
+        if (erroriConsecutivi >= maxErrori) {
+          log.error(
+            `${erroriConsecutivi} errori consecutivi: mi fermo per oggi per sicurezza. ` +
+              `Controlla la sessione WhatsApp. Inviati ${inviati}/${limiteOggi}.`
+          );
+          return;
+        }
       }
 
-      if (inviati >= cfg.messaggiAlGiorno) break;
+      if (inviati >= limiteOggi) break;
 
       const attesaMs = intervalloTraMessaggiMs(this.config);
       const prossimo = new Date(Date.now() + attesaMs);
 
       if (modalitaStrict && !this.avviaSubito && prossimo >= fineFinestra) {
         log.info(
-          `Prossimo invio cadrebbe fuori finestra. Stop per oggi: ${inviati}/${cfg.messaggiAlGiorno}.`
+          `Prossimo invio cadrebbe fuori finestra. Stop per oggi: ${inviati}/${limiteOggi}.`
         );
         return;
       }
 
       log.info(
-        `Prossimo messaggio tra ${Math.round(attesaMs / 60000)} min (${inviati}/${cfg.messaggiAlGiorno} oggi).`
+        `Prossimo messaggio tra ${Math.round(attesaMs / 60000)} min (${inviati}/${limiteOggi} oggi).`
       );
       // In modalita' "avvia subito" (test) accorcio le attese lunghe.
       await sleep(this.avviaSubito ? Math.min(attesaMs, 5000) : attesaMs);
@@ -186,4 +226,9 @@ class Scheduler {
   }
 }
 
-module.exports = { Scheduler, calcolaOrarioAvvioOggi, intervalloTraMessaggiMs };
+module.exports = {
+  Scheduler,
+  calcolaOrarioAvvioOggi,
+  intervalloTraMessaggiMs,
+  limiteMessaggiOggi,
+};

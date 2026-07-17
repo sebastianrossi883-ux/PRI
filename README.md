@@ -157,6 +157,26 @@ clients.example.json   Lista clienti di esempio
 messages.example.json  Template messaggi di esempio
 ```
 
+## Accorgimenti anti-ban inclusi
+
+- **Warm-up progressivo** (`warmup` nel config): un numero nuovo non deve partire
+  subito a 40 msg/giorno. Di default parte da **5** il primo giorno e cresce di
+  **+5** ogni giorno attivo fino a raggiungere il massimo. È la misura più
+  importante: disattivala (`"abilitato": false`) solo quando il numero è "caldo".
+- **Verifica numero su WhatsApp** (`antiBan.verificaNumeroWhatsapp`): prima di
+  inviare controlla che il numero esista su WhatsApp e, se non c'è, lo salta
+  (inviare a numeri inesistenti aumenta il sospetto di spam).
+- **Stop di sicurezza** (`antiBan.maxErroriConsecutivi`): dopo troppi errori di
+  invio di fila il bot si ferma per la giornata (di solito è un problema di
+  sessione: meglio fermarsi che insistere).
+- **"Sto scrivendo…"**, segna-come-letto, orario di avvio casuale, intervalli
+  casuali e 18 varianti di testo (vedi sopra).
+
+> Nessuna di queste tecniche azzera il rischio. Contano ancora di più: usare un
+> **numero secondario dedicato**, **WhatsApp Business**, **non inserire link**
+> nei primi messaggi, **rispondere** a chi risponde, e scrivere **solo a chi può
+> avere interesse** a essere contattato.
+
 ## Avvertenze
 
 - Usa questo strumento solo per **contattare persone che hanno acconsentito** a

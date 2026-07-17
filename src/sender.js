@@ -51,6 +51,24 @@ class Sender {
       return { ok: true, dryRun: true };
     }
 
+    // Verifica preventiva che il numero sia registrato su WhatsApp: inviare a
+    // numeri inesistenti aumenta il sospetto di spam.
+    if (this.antiBan.verificaNumeroWhatsapp) {
+      try {
+        const stato = await this.client.checkNumberStatus(chatId);
+        const registrato =
+          stato && (stato.numberExists === true || stato.canReceiveMessage === true);
+        if (stato && stato.numberExists === false) {
+          log.warn(`Salto ${cliente.nome} (${cliente.numero}): non su WhatsApp.`);
+          return { ok: false, skip: true, motivo: 'non-su-whatsapp' };
+        }
+        // Se la verifica e' incerta si prosegue comunque.
+        void registrato;
+      } catch (e) {
+        // Verifica fallita: non blocco l'invio.
+      }
+    }
+
     // Piccola pausa casuale prima di iniziare (comportamento umano).
     const pausaPre = randomInt(
       (this.antiBan.pausaCasualePrimaInvioMinSecondi ?? 2) * 1000,

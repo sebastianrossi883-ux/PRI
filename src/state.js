@@ -14,6 +14,8 @@ class Stato {
     this.dati = this._carica();
     if (typeof this.dati.cursoreCliente !== 'number') this.dati.cursoreCliente = 0;
     if (!this.dati.giorni) this.dati.giorni = {};
+    if (typeof this.dati.giorniAttivi !== 'number') this.dati.giorniAttivi = 0;
+    if (!this.dati.ultimoGiornoContato) this.dati.ultimoGiornoContato = null;
   }
 
   _carica() {
@@ -48,14 +50,34 @@ class Stato {
     return this.dati.cursoreCliente;
   }
 
-  registraInvio(numero, totaleClienti, data = new Date()) {
-    const g = this._giorno(data);
-    g.inviati += 1;
-    g.ultimoNumero = numero;
+  /**
+   * Registra che oggi e' un giorno "attivo" (di invio) e restituisce il numero
+   * progressivo del giorno (1 = primo giorno in assoluto). Serve al warm-up.
+   * Idempotente: chiamato piu' volte nello stesso giorno non incrementa.
+   */
+  numeroGiornoAttivo(data = new Date()) {
+    const chiave = chiaveGiorno(data);
+    if (this.dati.ultimoGiornoContato !== chiave) {
+      this.dati.giorniAttivi += 1;
+      this.dati.ultimoGiornoContato = chiave;
+      this._salva();
+    }
+    return this.dati.giorniAttivi;
+  }
+
+  /** Avanza il cursore dei clienti senza contare un invio (skip/errore). */
+  avanzaCursore(totaleClienti) {
     if (totaleClienti > 0) {
       this.dati.cursoreCliente = (this.dati.cursoreCliente + 1) % totaleClienti;
     }
     this._salva();
+  }
+
+  registraInvio(numero, totaleClienti, data = new Date()) {
+    const g = this._giorno(data);
+    g.inviati += 1;
+    g.ultimoNumero = numero;
+    this.avanzaCursore(totaleClienti);
   }
 }
 
