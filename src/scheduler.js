@@ -54,6 +54,25 @@ function limiteMessaggiOggi(config, numeroGiorno) {
 }
 
 /**
+ * Applica una variazione giornaliera casuale al limite (per un numero gia'
+ * consolidato): alcuni giorni qualche messaggio in piu', altri in meno, cosi'
+ * il totale non e' mai identico. Va deciso una volta al giorno.
+ *
+ * @param {object} config
+ * @param {number} base limite di partenza (es. messaggiAlGiorno)
+ * @returns {number} limite variato (minimo 1)
+ */
+function applicaVariazioneGiornaliera(config, base) {
+  const v = config.variazioneGiornaliera || {};
+  if (!v.abilitato) return base;
+  const min = v.minMessaggi ?? 5;
+  const max = v.maxMessaggi ?? 10;
+  const entita = randomInt(Math.min(min, max), Math.max(min, max));
+  const segno = Math.random() < 0.5 ? -1 : 1;
+  return Math.max(1, base + segno * entita);
+}
+
+/**
  * Ciclo giornaliero: attende l'orario di avvio casuale, poi invia i messaggi
  * rispettando la finestra oraria e gli intervalli casuali. Al termine
  * pianifica il giorno successivo.
@@ -124,11 +143,20 @@ class Scheduler {
       return;
     }
 
-    // Limite odierno con warm-up progressivo.
+    // Limite odierno: warm-up (numero nuovo) oppure variazione casuale (numero
+    // consolidato). Deciso una volta e memorizzato, cosi' resta stabile se
+    // il bot viene riavviato durante la giornata.
     const numeroGiorno = this.stato.numeroGiornoAttivo();
-    const limiteOggi = limiteMessaggiOggi(this.config, numeroGiorno);
+    let limiteOggi = this.stato.limiteGiorno();
+    if (limiteOggi == null) {
+      const base = limiteMessaggiOggi(this.config, numeroGiorno);
+      limiteOggi = applicaVariazioneGiornaliera(this.config, base);
+      this.stato.impostaLimiteGiorno(limiteOggi);
+    }
     if (this.config.warmup && this.config.warmup.abilitato) {
       log.info(`Warm-up: giorno ${numeroGiorno}, limite di oggi ${limiteOggi} messaggi.`);
+    } else if (this.config.variazioneGiornaliera && this.config.variazioneGiornaliera.abilitato) {
+      log.info(`Limite di oggi (con variazione casuale): ${limiteOggi} messaggi.`);
     }
 
     const maxErrori = (this.config.antiBan && this.config.antiBan.maxErroriConsecutivi) || 5;
@@ -231,4 +259,5 @@ module.exports = {
   calcolaOrarioAvvioOggi,
   intervalloTraMessaggiMs,
   limiteMessaggiOggi,
+  applicaVariazioneGiornaliera,
 };

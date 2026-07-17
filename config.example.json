@@ -26,10 +26,17 @@
   },
 
   "warmup": {
-    "_commento": "Riscaldamento progressivo del numero: parte con pochi messaggi e cresce ogni giorno. FONDAMENTALE per un numero nuovo. Con iniziali=5 e incremento=5: giorno1=5, giorno2=10, ... fino a messaggiAlGiorno.",
+    "_commento": "NUMERO NUOVO: riscaldamento progressivo. Parte con pochi messaggi e cresce ogni giorno fino a messaggiAlGiorno. Con iniziali=5 e incremento=5: giorno1=5, giorno2=10, ... Se il numero e' gia' consolidato metti 'abilitato': false e usa 'variazioneGiornaliera' qui sotto.",
     "abilitato": true,
     "messaggiIniziali": 5,
     "incrementoGiornaliero": 5
+  },
+
+  "variazioneGiornaliera": {
+    "_commento": "NUMERO CONSOLIDATO: invece di mandare sempre lo stesso numero esatto ogni giorno, varia il totale di un valore casuale (in piu' o in meno). Con min=5 e max=10 e messaggiAlGiorno=40, ogni giorno il target sara' tra 30 e 50. Decide un valore diverso ogni giorno.",
+    "abilitato": false,
+    "minMessaggi": 5,
+    "maxMessaggi": 10
   },
 
   "antiBan": {

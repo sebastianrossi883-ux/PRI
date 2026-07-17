@@ -159,10 +159,14 @@ messages.example.json  Template messaggi di esempio
 
 ## Accorgimenti anti-ban inclusi
 
-- **Warm-up progressivo** (`warmup` nel config): un numero nuovo non deve partire
-  subito a 40 msg/giorno. Di default parte da **5** il primo giorno e cresce di
-  **+5** ogni giorno attivo fino a raggiungere il massimo. È la misura più
-  importante: disattivala (`"abilitato": false`) solo quando il numero è "caldo".
+- **Warm-up progressivo** (`warmup` nel config) — *per numeri NUOVI*: non deve
+  partire subito a 40 msg/giorno. Di default parte da **5** il primo giorno e
+  cresce di **+5** ogni giorno attivo fino al massimo. È la misura più importante:
+  disattivala (`"abilitato": false`) solo quando il numero è "caldo".
+- **Variazione giornaliera** (`variazioneGiornaliera`) — *per numeri CONSOLIDATI*:
+  invece di mandare sempre esattamente `messaggiAlGiorno`, ogni giorno il totale
+  varia di un valore casuale in più o in meno (default ±5–10; es. base 40 →
+  30–50). Attivala **al posto** del warm-up quando il numero è già rodato.
 - **Verifica numero su WhatsApp** (`antiBan.verificaNumeroWhatsapp`): prima di
   inviare controlla che il numero esista su WhatsApp e, se non c'è, lo salta
   (inviare a numeri inesistenti aumenta il sospetto di spam).

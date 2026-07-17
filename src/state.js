@@ -45,6 +45,18 @@ class Stato {
     return this._giorno(data).inviati;
   }
 
+  /** Limite di messaggi deciso per oggi (null se non ancora deciso). */
+  limiteGiorno(data = new Date()) {
+    const l = this._giorno(data).limite;
+    return typeof l === 'number' ? l : null;
+  }
+
+  /** Memorizza il limite deciso per oggi, cosi' resta stabile tra i riavvii. */
+  impostaLimiteGiorno(valore, data = new Date()) {
+    this._giorno(data).limite = valore;
+    this._salva();
+  }
+
   /** Indice del prossimo cliente da contattare (rotazione globale). */
   cursoreCliente() {
     return this.dati.cursoreCliente;
