@@ -1,0 +1,8 @@
+# Lista "NON RICONTATTARE" — gestita a mano da te.
+# Un numero per riga. Puoi aggiungere una nota dopo il numero.
+# Le righe che iniziano con # o // vengono ignorate.
+# Copia questo file in blocklist.txt e mettici i numeri con cui gestisci
+# gia' tu la conversazione (o che non vuoi piu' contattare).
+
+393401234567   Bar Centrale - gia' cliente, seguo io
+393337654321   ha chiesto di non essere ricontattato

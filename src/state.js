@@ -36,13 +36,37 @@ class Stato {
   _giorno(data = new Date()) {
     const chiave = chiaveGiorno(data);
     if (!this.dati.giorni[chiave]) {
-      this.dati.giorni[chiave] = { inviati: 0, ultimoNumero: null };
+      this.dati.giorni[chiave] = { inviati: 0, saltati: 0, errori: 0, ultimoNumero: null };
     }
-    return this.dati.giorni[chiave];
+    const g = this.dati.giorni[chiave];
+    if (typeof g.saltati !== 'number') g.saltati = 0;
+    if (typeof g.errori !== 'number') g.errori = 0;
+    return g;
   }
 
   inviatiOggi(data = new Date()) {
     return this._giorno(data).inviati;
+  }
+
+  registraSkip(data = new Date()) {
+    this._giorno(data).saltati += 1;
+    this._salva();
+  }
+
+  registraErrore(data = new Date()) {
+    this._giorno(data).errori += 1;
+    this._salva();
+  }
+
+  /** Riepilogo della giornata per il report. */
+  riepilogoGiorno(data = new Date()) {
+    const g = this._giorno(data);
+    return {
+      inviati: g.inviati,
+      saltati: g.saltati,
+      errori: g.errori,
+      limite: typeof g.limite === 'number' ? g.limite : null,
+    };
   }
 
   /** Limite di messaggi deciso per oggi (null se non ancora deciso). */

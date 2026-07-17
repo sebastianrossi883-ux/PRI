@@ -3,6 +3,10 @@ node_modules/
 state.json
 config.json
 clients.json
+clients.csv
 messages.json
+blocklist.txt
+report.csv
+pausa
 *.log
 .DS_Store

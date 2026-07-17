@@ -54,11 +54,20 @@
     "_notaErrori": "Dopo questo numero di errori di invio di fila il bot si ferma per la giornata (probabile problema di sessione)."
   },
 
+  "giorni": {
+    "_commento": "Salto di weekend/festivi. Di DEFAULT spento: attivita' come ristoranti ed esperienze lavorano proprio nei weekend e nei festivi, quindi conviene scrivere anche allora. Attiva solo se ti serve. 'festivi' accetta 'AAAA-MM-GG' (data singola) o 'MM-GG' (ricorrenza annuale).",
+    "saltaWeekend": false,
+    "festivi": []
+  },
+
   "file": {
-    "_commento": "Il file clienti puo' essere .json, .csv, .txt o .vcf: il bot estrae automaticamente nome e numero.",
+    "_commento": "Il file clienti puo' essere .json, .csv, .txt o .vcf: il bot estrae automaticamente nome e numero. 'blocklist' e' la lista 'non ricontattare' (gestita a mano da te). 'pausa': se crei un file con questo nome il bot va in pausa finche' non lo cancelli.",
     "clienti": "clients.csv",
     "messaggi": "messages.json",
-    "stato": "state.json"
+    "stato": "state.json",
+    "report": "report.csv",
+    "blocklist": "blocklist.txt",
+    "pausa": "pausa"
   },
 
   "openwa": {

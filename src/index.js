@@ -2,6 +2,7 @@
 
 const log = require('./logger');
 const { caricaConfig, caricaClienti, caricaMessaggi } = require('./config');
+const { caricaBlocklist } = require('./blocklist');
 const { Stato } = require('./state');
 const { Sender } = require('./sender');
 const { Scheduler } = require('./scheduler');
@@ -34,10 +35,9 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
 
   const config = caricaConfig();
-  const clienti = caricaClienti(
-    config.file.clientiPath,
-    config.prefissoInternazionaleDefault || ''
-  );
+  const prefisso = config.prefissoInternazionaleDefault || '';
+  const blocklist = caricaBlocklist(config.file.blocklistPath, prefisso);
+  const clienti = caricaClienti(config.file.clientiPath, prefisso, blocklist);
   const messaggi = caricaMessaggi(config.file.messaggiPath);
   const stato = new Stato(config.file.statoPath);
 
@@ -46,6 +46,14 @@ async function main() {
       `${config.invii.messaggiAlGiorno} msg/giorno, finestra ${config.finestra.oraInizio}-${config.finestra.oraFine}, ` +
       `intervallo ${config.invii.intervalloMinMinuti}-${config.invii.intervalloMaxMinuti} min.`
   );
+  if (blocklist.size > 0) {
+    log.info(
+      `Blocklist: ${blocklist.size} numeri da non ricontattare` +
+        (clienti._esclusiBlocklist
+          ? `, ${clienti._esclusiBlocklist} esclusi dalla lista.`
+          : '.')
+    );
+  }
 
   let client = null;
   if (!args.dryRun) {

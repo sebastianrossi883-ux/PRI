@@ -1,11 +1,14 @@
 'use strict';
 
+const fs = require('fs');
 const log = require('./logger');
+const { motivoSkipGiorno } = require('./calendario');
 const {
   randomInt,
   sleep,
   orarioInMinuti,
   dataOggiAMinuti,
+  chiaveGiorno,
 } = require('./utils');
 
 /**
@@ -104,6 +107,14 @@ class Scheduler {
     const adesso = new Date();
     const fineFinestra = fineFinestraOggi(this.config, adesso);
 
+    // Salto weekend/festivi se configurato (di default e' spento: ristoranti
+    // ed esperienze lavorano proprio nei weekend/festivi).
+    const motivo = motivoSkipGiorno(adesso, this.config.giorni);
+    if (motivo && !this.avviaSubito) {
+      log.info(`Oggi e' ${motivo}: salto la giornata (configurazione 'giorni').`);
+      return;
+    }
+
     if (!this.avviaSubito) {
       let orarioAvvio = calcolaOrarioAvvioOggi(this.config, adesso);
 
@@ -131,6 +142,47 @@ class Scheduler {
     }
 
     await this._cicloInvii(fineFinestra);
+    this._reportGiornata();
+  }
+
+  /** Se esiste il file di pausa, attende (senza inviare) finche' non viene rimosso. */
+  async _attendiSePausa() {
+    const f = this.config.file && this.config.file.pausaPath;
+    if (!f || this.avviaSubito) return;
+    let annunciato = false;
+    while (this.attivo && fs.existsSync(f)) {
+      if (!annunciato) {
+        log.info(`In PAUSA: trovato il file "${f}". Rimuovilo per riprendere.`);
+        annunciato = true;
+      }
+      await sleep(30000);
+    }
+    if (annunciato) log.info('Pausa terminata: riprendo.');
+  }
+
+  /** Scrive un riepilogo della giornata a log e in coda al file report CSV. */
+  _reportGiornata() {
+    const r = this.stato.riepilogoGiorno();
+    log.ok(
+      `Riepilogo oggi -> inviati: ${r.inviati}, saltati: ${r.saltati}, errori: ${r.errori}` +
+        (r.limite != null ? `, obiettivo: ${r.limite}` : '')
+    );
+    try {
+      const percorso = this.config.file && this.config.file.reportPath;
+      if (!percorso) return;
+      const oggi = chiaveGiorno(new Date());
+      const intestazione = 'data,inviati,saltati,errori,obiettivo\n';
+      if (!fs.existsSync(percorso)) fs.writeFileSync(percorso, intestazione, 'utf8');
+      // Riga sempre aggiornata per la giornata (sovrascrive quella di oggi se c'e').
+      const righe = fs
+        .readFileSync(percorso, 'utf8')
+        .split('\n')
+        .filter((l) => l && !l.startsWith(`${oggi},`) && !l.startsWith('data,'));
+      righe.unshift(`${oggi},${r.inviati},${r.saltati},${r.errori},${r.limite ?? ''}`);
+      fs.writeFileSync(percorso, intestazione + righe.join('\n') + '\n', 'utf8');
+    } catch (e) {
+      log.warn('Impossibile scrivere il report:', e.message);
+    }
   }
 
   async _cicloInvii(fineFinestra) {
@@ -161,6 +213,7 @@ class Scheduler {
 
     const maxErrori = (this.config.antiBan && this.config.antiBan.maxErroriConsecutivi) || 5;
     let erroriConsecutivi = 0;
+    let saltatiConsecutivi = 0;
 
     let inviati = this.stato.inviatiOggi();
     if (inviati > 0) {
@@ -168,6 +221,10 @@ class Scheduler {
     }
 
     while (this.attivo && inviati < limiteOggi) {
+      // Pausa manuale (file di pausa) prima di ogni messaggio.
+      await this._attendiSePausa();
+      if (!this.attivo) return;
+
       const adesso = new Date();
 
       if (modalitaStrict && !this.avviaSubito && adesso >= fineFinestra) {
@@ -186,14 +243,25 @@ class Scheduler {
         this.stato.registraInvio(cliente.numero, totaleClienti);
         inviati += 1;
         erroriConsecutivi = 0;
+        saltatiConsecutivi = 0;
       } else if (esito.skip) {
         // Numero non su WhatsApp: salto senza contare e senza allarmarmi.
+        this.stato.registraSkip();
         this.stato.avanzaCursore(totaleClienti);
-        continue; // passo subito al prossimo, senza attesa lunga
+        saltatiConsecutivi += 1;
+        // Guardia: se ho girato l'intera lista solo saltando, mi fermo.
+        if (saltatiConsecutivi >= totaleClienti) {
+          log.warn('Tutti i clienti rimanenti non sono su WhatsApp: stop per oggi.');
+          return;
+        }
+        await sleep(this.avviaSubito ? 200 : randomInt(1000, 3000));
+        continue; // passo al prossimo senza l'attesa lunga
       } else {
         // Errore di invio: avanzo il cursore e tengo il conto degli errori.
+        this.stato.registraErrore();
         this.stato.avanzaCursore(totaleClienti);
         erroriConsecutivi += 1;
+        saltatiConsecutivi = 0;
         if (erroriConsecutivi >= maxErrori) {
           log.error(
             `${erroriConsecutivi} errori consecutivi: mi fermo per oggi per sicurezza. ` +

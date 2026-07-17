@@ -181,6 +181,23 @@ messages.example.json  Template messaggi di esempio
 > nei primi messaggi, **rispondere** a chi risponde, e scrivere **solo a chi può
 > avere interesse** a essere contattato.
 
+## Altre funzioni utili
+
+- 📊 **Report giornaliero** (`file.report`, default `report.csv`): a fine giornata
+  scrive quanti messaggi **inviati / saltati / errori** e l'obiettivo del giorno.
+  Una riga per data.
+- 🚫 **Lista "non ricontattare"** (`file.blocklist`, default `blocklist.txt`):
+  **la gestisci tu a mano**. Un numero per riga (con eventuale nota dopo). I
+  numeri elencati vengono esclusi dagli invii. Il bot **non aggiunge mai** nessuno
+  da solo: le conversazioni le porti avanti tu, quindi decidi tu chi escludere.
+  Vedi `blocklist.example.txt`.
+- ⏸️ **Pausa manuale**: crea un file chiamato `pausa` nella cartella del progetto
+  e il bot **si ferma** (senza inviare) finché non lo cancelli. Utile per
+  sospendere al volo senza spegnere il processo.
+- ⏹️ **Stop pulito**: `Ctrl+C` chiude la sessione WhatsApp in modo ordinato.
+- 📅 **Salto weekend/festivi** (`giorni`): **spento di default** perché ristoranti
+  ed esperienze lavorano proprio nei weekend/festivi. Attivalo solo se ti serve.
+
 ## Avvertenze
 
 - Usa questo strumento solo per **contattare persone che hanno acconsentito** a
