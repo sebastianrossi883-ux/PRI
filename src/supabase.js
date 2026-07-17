@@ -85,10 +85,58 @@ async function scriviReportSupabase(sb, dataKey, riepilogo) {
   if (error) log.warn('Supabase (report): ' + error.message);
 }
 
+/* ---------------- Fase 4: due vie (inbox + outbox) ---------------- */
+
+/** Salva un messaggio in arrivo e aggiorna la conversazione. */
+async function salvaMessaggioRicevuto(sb, accountId, numero, testo) {
+  const { error: e1 } = await sb.from('messaggi_ricevuti').insert({
+    account_id: accountId,
+    numero_cliente: numero,
+    testo: testo || '',
+  });
+  if (e1) throw new Error('Supabase (ricevuti): ' + e1.message);
+
+  // Aggiorna/crea la conversazione (legata a questo account = numero giusto).
+  const { error: e2 } = await sb.from('conversazioni').upsert(
+    {
+      account_id: accountId,
+      numero_cliente: numero,
+      ultimo_testo: testo || '',
+      ultimo_il: new Date().toISOString(),
+    },
+    { onConflict: 'account_id,numero_cliente' }
+  );
+  if (e2) throw new Error('Supabase (conversazioni): ' + e2.message);
+}
+
+/** Prende le risposte in coda per questo account (da inviare). */
+async function prendiRisposteDaInviare(sb, accountId, limite = 20) {
+  const { data, error } = await sb
+    .from('risposte_da_inviare')
+    .select('id,numero_cliente,testo')
+    .eq('account_id', accountId)
+    .eq('stato', 'pending')
+    .order('creato_il', { ascending: true })
+    .limit(limite);
+  if (error) throw new Error('Supabase (outbox): ' + error.message);
+  return data || [];
+}
+
+/** Segna una risposta come inviata o in errore. */
+async function segnaRisposta(sb, id, stato) {
+  const patch = { stato };
+  if (stato === 'inviato') patch.inviato_il = new Date().toISOString();
+  const { error } = await sb.from('risposte_da_inviare').update(patch).eq('id', id);
+  if (error) log.warn('Supabase (segna risposta): ' + error.message);
+}
+
 module.exports = {
   creaSupabase,
   caricaClientiSupabase,
   caricaMessaggiSupabase,
   caricaBlocklistSupabase,
   scriviReportSupabase,
+  salvaMessaggioRicevuto,
+  prendiRisposteDaInviare,
+  segnaRisposta,
 };

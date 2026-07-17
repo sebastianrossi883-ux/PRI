@@ -5,9 +5,21 @@
   "_commentoMotore": "'baileys' = senza browser, leggero, con proxy (consigliato su server AWS/Oracle). 'openwa' = con browser Chromium.",
 
   "baileys": {
-    "_commento": "Impostazioni motore Baileys. proxyUrl: IP dedicato per questo numero (IPRoyal ISP static, Italia). Formati: http://utente:password@host:porta oppure socks5://utente:password@host:porta. Lascia vuoto SOLO in locale sulla tua rete di casa; su un datacenter (AWS/Oracle) senza proxy rischi il ban.",
+    "_commento": "Impostazioni motore Baileys (usate se NON usi la lista 'account' multi-numero qui sotto). proxyUrl: IP dedicato (IPRoyal ISP static, Italia). Formati: http://utente:password@host:porta oppure socks5://... Lascia vuoto SOLO in locale; su datacenter (AWS/Oracle) senza proxy rischi il ban.",
     "cartellaSessione": "./.baileys-auth",
     "proxyUrl": ""
+  },
+
+  "_account_commento": "MULTI-NUMERO (Fase 4). Lascia 'account' vuoto [] per usare il singolo numero della sezione 'baileys'. Per piu' numeri, riempi 'account' come in '_account_esempio': OGNI numero ha il SUO proxy (1 IP dedicato ciascuno!) e la SUA cartella sessione. Le risposte escono sempre dal numero che gestisce la conversazione.",
+  "_account_esempio": [
+    { "id": "num1", "numero": "393401111111", "proxyUrl": "http://utente:password@host1:porta", "cartellaSessione": "./.baileys-num1" },
+    { "id": "num2", "numero": "393402222222", "proxyUrl": "http://utente:password@host2:porta", "cartellaSessione": "./.baileys-num2" }
+  ],
+  "account": [],
+
+  "inbox": {
+    "_commento": "Fase 4: ogni quanti secondi il bot controlla la coda 'risposte_da_inviare' su Supabase e invia le tue risposte. Richiede Supabase abilitato.",
+    "pollingSecondi": 10
   },
 
   "prefissoInternazionaleDefault": "39",

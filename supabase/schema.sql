@@ -39,6 +39,48 @@ create table if not exists report (
 create index if not exists idx_clienti_attivo on clienti (attivo);
 create unique index if not exists idx_blocklist_numero on blocklist (numero);
 
+-- ============================================================
+-- FASE 4: messaggistica a due vie (ricevere + rispondere)
+-- ============================================================
+
+-- Una riga per conversazione (cliente <-> uno specifico TUO numero).
+-- account_id identifica il numero che gestisce la conversazione: le risposte
+-- devono uscire SEMPRE da quello, mai da un altro.
+create table if not exists conversazioni (
+  id            bigint generated always as identity primary key,
+  account_id    text not null,
+  numero_cliente text not null,
+  nome          text,
+  ultimo_testo  text,
+  ultimo_il     timestamptz not null default now(),
+  non_letti     int not null default 0,
+  unique (account_id, numero_cliente)
+);
+
+-- Messaggi in ARRIVO dai clienti (il tuo inbox).
+create table if not exists messaggi_ricevuti (
+  id            bigint generated always as identity primary key,
+  account_id    text not null,
+  numero_cliente text not null,
+  testo         text,
+  ricevuto_il   timestamptz not null default now(),
+  letto         boolean not null default false
+);
+
+-- Coda delle TUE risposte da inviare (le scrivi dalla UI, il motore le manda).
+create table if not exists risposte_da_inviare (
+  id            bigint generated always as identity primary key,
+  account_id    text not null,
+  numero_cliente text not null,
+  testo         text not null,
+  stato         text not null default 'pending',  -- pending | inviato | errore
+  creato_il     timestamptz not null default now(),
+  inviato_il    timestamptz
+);
+
+create index if not exists idx_ricevuti_conv on messaggi_ricevuti (account_id, numero_cliente);
+create index if not exists idx_outbox_pending on risposte_da_inviare (account_id, stato);
+
 -- NOTA sicurezza: il bot userà la "service role key" (lato server, segreta).
--- Se poi colleghi Lovable, valuta di attivare Row Level Security (RLS) e
+-- Se poi colleghi Lovable/Vercel, valuta di attivare Row Level Security (RLS) e
 -- policy adeguate per l'accesso dal browser.
