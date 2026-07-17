@@ -1,12 +1,10 @@
 [
-  "Salve, parlo con {nome}? Mi chiamo [TUO NOME] e vi contatto per [MOTIVO]. Avreste cortesemente un minuto da dedicarmi?",
-  "Buongiorno, sto scrivendo a {nome}. Sono [TUO NOME]; vorrei sottoporvi brevemente [MOTIVO]. È un buon momento per parlarne?",
-  "Gentile {nome}, buongiorno. Mi chiamo [TUO NOME] e mi permetto di scrivervi in merito a [MOTIVO]. Sarebbe possibile approfondire?",
-  "Salve, parlo con {nome}? Sono [TUO NOME], uno studente, e sto lavorando a [MOTIVO]. Le ruberei solo un minuto, se possibile.",
-  "Buongiorno {nome}, mi chiamo [TUO NOME]. Vi scrivo con cortesia per proporvi [MOTIVO]. A chi potrei rivolgermi per qualche informazione?",
-  "Gentile {nome}, sono [TUO NOME], studente, e sto svolgendo [MOTIVO]. Vi disturberei giusto il tempo di una breve domanda.",
-  "Salve, vi contatto in riferimento a {nome}. Mi chiamo [TUO NOME] e vorrei presentarvi [MOTIVO]. Resto a vostra disposizione per un confronto.",
-  "Buongiorno, parlo con {nome}? Sono [TUO NOME]. Mi piacerebbe illustrarvi brevemente [MOTIVO]: avreste qualche minuto nei prossimi giorni?",
-  "Gentile {nome}, buongiorno. Sono [TUO NOME] e mi rivolgo a voi per [MOTIVO]. Vi ringrazio fin d'ora per la cortese attenzione.",
-  "Salve {nome}, mi chiamo [TUO NOME], sono uno studente e sto raccogliendo informazioni per [MOTIVO]. Potreste dedicarmi un momento, per favore?"
+  "Salve, parlo con {nome}? Sono uno studente e vi contatto per [MOTIVO]. Avreste un minuto?",
+  "Buongiorno, parlo con {nome}? Sono uno studente, avrei una domanda su [MOTIVO]. Posso disturbarvi un attimo?",
+  "Salve, sono uno studente. Parlo con {nome}? Vi scrivo per [MOTIVO], avreste un momento?",
+  "Buongiorno {nome}, sono uno studente e vorrei chiedervi una cosa su [MOTIVO]. Grazie in anticipo!",
+  "Salve, parlo con {nome}? Sono uno studente e sto raccogliendo qualche informazione su [MOTIVO]. Potreste aiutarmi?",
+  "Buongiorno, sono uno studente. Parlo con {nome}? Avrei bisogno di un'informazione riguardo [MOTIVO].",
+  "Salve {nome}, sono uno studente e vi contatto per [MOTIVO]. Avreste un minuto per me?",
+  "Buongiorno, parlo con {nome}? Sono uno studente, le ruberei giusto un minuto per [MOTIVO]."
 ]
