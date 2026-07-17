@@ -3,6 +3,13 @@
 const log = require('./logger');
 const { caricaConfig, caricaClienti, caricaMessaggi } = require('./config');
 const { caricaBlocklist } = require('./blocklist');
+const {
+  creaSupabase,
+  caricaClientiSupabase,
+  caricaMessaggiSupabase,
+  caricaBlocklistSupabase,
+  scriviReportSupabase,
+} = require('./supabase');
 const { Stato } = require('./state');
 const { Sender } = require('./sender');
 const { Scheduler } = require('./scheduler');
@@ -47,10 +54,22 @@ async function main() {
 
   const config = caricaConfig();
   const prefisso = config.prefissoInternazionaleDefault || '';
-  const blocklist = caricaBlocklist(config.file.blocklistPath, prefisso);
-  const clienti = caricaClienti(config.file.clientiPath, prefisso, blocklist);
-  const messaggi = caricaMessaggi(config.file.messaggiPath);
   const stato = new Stato(config.file.statoPath);
+
+  // Sorgente dati: Supabase se abilitato, altrimenti file locali.
+  const sb = creaSupabase(config);
+  let blocklist, clienti, messaggi, onReport = null;
+  if (sb) {
+    log.info('Sorgente dati: Supabase.');
+    blocklist = await caricaBlocklistSupabase(sb, prefisso);
+    clienti = await caricaClientiSupabase(sb, prefisso, blocklist);
+    messaggi = await caricaMessaggiSupabase(sb);
+    onReport = (dataKey, r) => scriviReportSupabase(sb, dataKey, r);
+  } else {
+    blocklist = caricaBlocklist(config.file.blocklistPath, prefisso);
+    clienti = caricaClienti(config.file.clientiPath, prefisso, blocklist);
+    messaggi = caricaMessaggi(config.file.messaggiPath);
+  }
 
   log.info(
     `Configurazione: ${clienti.length} clienti attivi, ${messaggi.length} template, ` +
@@ -81,6 +100,7 @@ async function main() {
     clienti,
     messaggi,
     avviaSubito: args.now,
+    onReport,
   });
 
   const chiusura = async () => {

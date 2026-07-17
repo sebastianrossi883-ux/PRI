@@ -81,13 +81,14 @@ function applicaVariazioneGiornaliera(config, base) {
  * pianifica il giorno successivo.
  */
 class Scheduler {
-  constructor({ config, sender, stato, clienti, messaggi, avviaSubito = false }) {
+  constructor({ config, sender, stato, clienti, messaggi, avviaSubito = false, onReport = null }) {
     this.config = config;
     this.sender = sender;
     this.stato = stato;
     this.clienti = clienti;
     this.messaggi = messaggi;
     this.avviaSubito = avviaSubito;
+    this.onReport = onReport; // callback opzionale (es. scrittura su Supabase)
     this.attivo = true;
   }
 
@@ -182,6 +183,12 @@ class Scheduler {
       fs.writeFileSync(percorso, intestazione + righe.join('\n') + '\n', 'utf8');
     } catch (e) {
       log.warn('Impossibile scrivere il report:', e.message);
+    }
+    // Report anche su Supabase, se configurato.
+    if (this.onReport) {
+      Promise.resolve(this.onReport(chiaveGiorno(new Date()), r)).catch((e) =>
+        log.warn('Report esterno fallito:', e.message)
+      );
     }
   }
 

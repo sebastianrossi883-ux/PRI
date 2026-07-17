@@ -84,5 +84,12 @@
     "sessionId": "clienti",
     "headless": true,
     "cartellaSessione": "./.wa-session"
+  },
+
+  "supabase": {
+    "_commento": "FASE 2 (opzionale): se abilitato, clienti/messaggi/blocklist vengono letti da Supabase e il report scritto li'. La serviceKey e' SEGRETA (solo lato server). Con abilitato=false si usano i file locali.",
+    "abilitato": false,
+    "url": "",
+    "serviceKey": ""
   }
 }
