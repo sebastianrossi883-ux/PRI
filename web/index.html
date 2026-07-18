@@ -57,6 +57,12 @@
       <textarea id="bulk" rows="5" placeholder="Bar Centrale,3401234567&#10;3487654321&#10;..."></textarea>
       <button id="btnBulk">Aggiungi alla lista</button>
       <div class="msg" id="clientiMsg"></div>
+
+      <h3>Oppure carica un file</h3>
+      <p class="muted small">Excel (<code>.xlsx</code>) o <code>.csv</code>. Riconosce da solo <b>nome</b> e <b>numero di telefono</b>, anche se sono in colonne diverse.</p>
+      <input type="file" id="fileClienti" accept=".xlsx,.xls,.csv,.txt" />
+      <div class="msg" id="fileMsg"></div>
+
       <h3>Lista clienti (<span id="clientiCount">0</span>)</h3>
       <div id="clientiList" class="rows"><div class="empty">Caricamento...</div></div>
     </div>
@@ -125,6 +131,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

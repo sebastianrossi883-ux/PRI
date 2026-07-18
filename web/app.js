@@ -176,6 +176,89 @@ function normNum(raw) {
   return d;
 }
 
+/* ---------- IMPORT DA FILE (Excel / CSV) ---------- */
+$('fileClienti').onchange = importaFile;
+async function importaFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  $('fileMsg').textContent = 'Leggo il file...';
+  try {
+    const nome = f.name.toLowerCase();
+    let righe;
+    if (nome.endsWith('.xlsx') || nome.endsWith('.xls')) {
+      const buf = await f.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      righe = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    } else {
+      const txt = await f.text();
+      righe = txt.split(/\r?\n/).map((l) => l.split(/[,;\t]/));
+    }
+    const nuovi = estraiNomeNumero(righe);
+    if (!nuovi.length) {
+      $('fileMsg').textContent = 'Nessun numero di telefono valido trovato nel file.';
+      return;
+    }
+    const { error } = await sb.from('clienti').insert(nuovi);
+    if (error) { $('fileMsg').textContent = 'Errore: ' + error.message; return; }
+    $('fileMsg').textContent = nuovi.length + ' clienti importati dal file ✓';
+    caricaClienti();
+  } catch (err) {
+    $('fileMsg').textContent = 'Errore lettura file: ' + (err.message || err);
+  } finally {
+    e.target.value = '';
+  }
+}
+
+/* Riconosce nome e numero da righe (array di celle), con o senza intestazione. */
+function estraiNomeNumero(righe) {
+  const out = [];
+  if (!righe || !righe.length) return out;
+  const reNome = /nome|name|ragione|cliente|contatto|azienda|attivit/i;
+  const reNum = /tel|telefono|phone|cell|numero|mobile|whats/i;
+
+  // Rileva l'intestazione (prima riga con parole chiave note).
+  const head = (righe[0] || []).map((c) => String(c == null ? '' : c).trim());
+  let idxNome = -1, idxNum = -1, start = 0;
+  if (head.some((h) => reNome.test(h)) || head.some((h) => reNum.test(h))) {
+    head.forEach((h, i) => {
+      if (idxNome < 0 && reNome.test(h)) idxNome = i;
+      if (idxNum < 0 && reNum.test(h)) idxNum = i;
+    });
+    start = 1;
+  }
+
+  const visti = new Set();
+  for (let r = start; r < righe.length; r++) {
+    const cells = (righe[r] || []).map((c) => String(c == null ? '' : c).trim());
+    if (!cells.some(Boolean)) continue;
+
+    let numero = idxNum >= 0 ? normNum(cells[idxNum]) : '';
+    let nome = idxNome >= 0 ? cells[idxNome] : '';
+
+    // Se non ho la colonna numero, prendo la cella che sembra un telefono.
+    if (!numero || numero.length < 8) {
+      let best = '';
+      for (const c of cells) {
+        const d = normNum(c);
+        if (d.length >= 8 && d.length >= best.length && (c.match(/\d/g) || []).length >= 6) best = d;
+      }
+      numero = best;
+    }
+    // Se non ho la colonna nome, prendo la prima cella con lettere (non il numero).
+    if (!nome) {
+      for (const c of cells) {
+        if (c && /[a-zà-ù]/i.test(c) && normNum(c).length < 8) { nome = c; break; }
+      }
+    }
+    if (numero && numero.length >= 8 && !visti.has(numero)) {
+      visti.add(numero);
+      out.push({ nome: nome || 'cliente', numero, attivo: true });
+    }
+  }
+  return out;
+}
+
 /* ---------- MESSAGGI ---------- */
 $('btnAddMsg').onclick = aggiungiMessaggio;
 async function caricaMessaggi() {
