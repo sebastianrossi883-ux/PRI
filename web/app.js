@@ -43,7 +43,7 @@ function apriView(v) {
   if (v === 'inbox') { caricaLista(); timerLista = setInterval(caricaLista, 6000); }
   if (v === 'clienti') caricaClienti();
   if (v === 'messaggi') caricaMessaggi();
-  if (v === 'numeri') { caricaNumeri(); caricaProva(); timerNumeri = setInterval(caricaNumeri, 5000); }
+  if (v === 'numeri') { caricaNumeri(); caricaProva(); caricaPausa(); timerNumeri = setInterval(caricaNumeri, 5000); }
   if (v === 'report') caricaReport();
 }
 
@@ -297,6 +297,26 @@ async function apriQr(a) {
 function chiudiQr() {
   $('qrModal').classList.add('hidden');
   if (timerQr) { clearInterval(timerQr); timerQr = null; }
+}
+
+/* ---------- PAUSA (ferma/riprendi invii) ---------- */
+$('pausaOn').onchange = salvaPausa;
+async function caricaPausa() {
+  const { data } = await sb.from('impostazioni').select('valore').eq('chiave', 'pausa').maybeSingle();
+  const on = data && data.valore === 'true';
+  $('pausaOn').checked = on;
+  aggiornaEtichettaPausa(on);
+}
+function aggiornaEtichettaPausa(on) {
+  $('pausaLbl').textContent = on ? '▶ Invii FERMI — tocca per riprendere' : '⏸ Ferma gli invii automatici';
+}
+async function salvaPausa() {
+  const on = $('pausaOn').checked;
+  aggiornaEtichettaPausa(on);
+  const { error } = await sb.from('impostazioni').upsert(
+    { chiave: 'pausa', valore: on ? 'true' : 'false' }, { onConflict: 'chiave' });
+  $('pausaMsg').textContent = error ? 'Errore: ' + error.message
+    : (on ? 'Invii fermati (si applica entro ~30s).' : 'Invii ripresi.');
 }
 
 /* ---------- PROVA ---------- */

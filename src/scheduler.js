@@ -82,7 +82,7 @@ function applicaVariazioneGiornaliera(config, base) {
  * pianifica il giorno successivo.
  */
 class Scheduler {
-  constructor({ config, sender, stato, clienti, messaggi, avviaSubito = false, onReport = null }) {
+  constructor({ config, sender, stato, clienti, messaggi, avviaSubito = false, onReport = null, pausaProvider = null }) {
     this.config = config;
     this.sender = sender;
     this.stato = stato;
@@ -90,6 +90,7 @@ class Scheduler {
     this.messaggi = messaggi;
     this.avviaSubito = avviaSubito;
     this.onReport = onReport; // callback opzionale (es. scrittura su Supabase)
+    this.pausaProvider = pausaProvider; // funzione async che dice se sei in pausa (dal pannello)
     this.attivo = true;
     this._mazzo = []; // "mazzo" di messaggi mescolato (per non ripetere l'ordine)
   }
@@ -166,14 +167,23 @@ class Scheduler {
     this._reportGiornata();
   }
 
-  /** Se esiste il file di pausa, attende (senza inviare) finche' non viene rimosso. */
-  async _attendiSePausa() {
+  /** Vero se sei in pausa: via file di pausa OPPURE via pannello (Supabase). */
+  async _inPausa() {
     const f = this.config.file && this.config.file.pausaPath;
-    if (!f || this.avviaSubito) return;
+    if (f && !this.avviaSubito && fs.existsSync(f)) return true;
+    if (this.pausaProvider && !this.avviaSubito) {
+      try { if (await this.pausaProvider()) return true; } catch (_) { /* ignora */ }
+    }
+    return false;
+  }
+
+  /** Attende (senza inviare) finche' la pausa non viene tolta (file o pannello). */
+  async _attendiSePausa() {
+    if (this.avviaSubito) return;
     let annunciato = false;
-    while (this.attivo && fs.existsSync(f)) {
+    while (this.attivo && (await this._inPausa())) {
       if (!annunciato) {
-        log.info(`In PAUSA: trovato il file "${f}". Rimuovilo per riprendere.`);
+        log.info('In PAUSA (dal pannello o dal file di pausa). Riprendo appena la togli.');
         annunciato = true;
       }
       await sleep(30000);

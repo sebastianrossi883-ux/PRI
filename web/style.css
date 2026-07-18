@@ -95,6 +95,9 @@ code { background: var(--bg); padding: 1px 5px; border-radius: 5px; font-size: 1
 .num.danger { color: var(--danger); }
 .switch { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
 .switch input { width: auto; }
+.switch.big { font-size: 16px; font-weight: 600; padding: 12px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--panel); }
+.switch.big input { width: 20px; height: 20px; }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex;
   align-items: center; justify-content: center; z-index: 20; padding: 16px; }
 .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 14px;

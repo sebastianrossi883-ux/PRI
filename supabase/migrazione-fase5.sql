@@ -22,10 +22,11 @@ create table if not exists impostazioni (
   valore text
 );
 
--- Valori iniziali della modalità prova (spenta).
+-- Valori iniziali: modalità prova spenta, invii NON in pausa.
 insert into impostazioni (chiave, valore) values
   ('prova_abilitato', 'false'),
-  ('prova_numero', '')
+  ('prova_numero', ''),
+  ('pausa', 'false')
 on conflict (chiave) do nothing;
 
 -- ---------- Sicurezza (RLS): solo utenti autenticati dal pannello ----------

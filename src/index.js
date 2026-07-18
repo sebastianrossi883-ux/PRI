@@ -176,6 +176,13 @@ async function main() {
     const statoPath = config.file.statoPath.replace(/\.json$/, `-${id}.json`);
     const stato = new Stato(statoPath);
     const sender = new Sender(client, config, false);
+    // Pausa comandabile dal pannello: legge l'interruttore 'pausa' da Supabase.
+    const pausaProvider = sb
+      ? async () => {
+          const imp = await leggiImpostazioni(sb);
+          return imp.pausa === 'true' || imp.pausa === true;
+        }
+      : null;
     const scheduler = new Scheduler({
       config,
       sender,
@@ -184,6 +191,7 @@ async function main() {
       messaggi,
       avviaSubito: args.now,
       onReport,
+      pausaProvider,
     });
     schedulers.push(scheduler);
     await scheduler.avvia();
