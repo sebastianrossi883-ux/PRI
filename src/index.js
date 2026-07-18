@@ -9,6 +9,9 @@ const {
   caricaMessaggiSupabase,
   caricaBlocklistSupabase,
   scriviReportSupabase,
+  caricaAccountSupabase,
+  aggiornaStatoAccount,
+  leggiImpostazioni,
 } = require('./supabase');
 const { creaGestoreArrivo, avviaOutbox } = require('./inbox');
 const { Stato } = require('./state');
@@ -55,6 +58,21 @@ function elencaAccount(config) {
   return [{ id: 'default', proxyUrl: b.proxyUrl, cartellaSessione: b.cartellaSessione }];
 }
 
+/**
+ * Decide da dove prendere i numeri:
+ *  - se Supabase e' attivo e la tabella 'account' ha righe -> usa QUELLI (li
+ *    gestisci dal pannello: aggiungi numeri e IP dal telefono, senza PC);
+ *  - altrimenti usa la config (singolo numero o lista 'account').
+ * Ogni numero porta sempre il SUO proxy/IP e la SUA sessione isolata.
+ */
+async function elencaAccountEffettivi(config, sb) {
+  if (sb) {
+    const daDb = await caricaAccountSupabase(sb);
+    if (daDb.length) return { account: daDb, dinamico: true };
+  }
+  return { account: elencaAccount(config), dinamico: false };
+}
+
 /** Divide i clienti tra gli account (assegnazione stabile per rotazione). */
 function distribuisci(clienti, nAccount) {
   const gruppi = Array.from({ length: nAccount }, () => []);
@@ -83,6 +101,23 @@ async function main() {
   const sb = creaSupabase(config);
   const onReport = sb ? (dataKey, r) => scriviReportSupabase(sb, dataKey, r) : null;
 
+  // Impostazioni gestibili dal pannello (es. MODALITA' PROVA on/off + numero).
+  // Hanno la precedenza sulla config del server, cosi' le cambi dal telefono.
+  let chiaveImpostazioni = '';
+  if (sb) {
+    const imp = await leggiImpostazioni(sb);
+    if (imp.prova_abilitato !== undefined || imp.prova_numero) {
+      config.prova = {
+        abilitato: imp.prova_abilitato === 'true' || imp.prova_abilitato === true,
+        numero: imp.prova_numero || (config.prova && config.prova.numero) || '',
+      };
+    }
+    chiaveImpostazioni = `${config.prova && config.prova.abilitato}|${config.prova && config.prova.numero}`;
+    if (config.prova && config.prova.abilitato) {
+      log.warn(`MODALITA' PROVA ATTIVA: i messaggi vanno al tuo numero ${config.prova.numero}, non ai clienti.`);
+    }
+  }
+
   const { blocklist, clienti, messaggi } = await caricaDati(config, sb, prefisso);
 
   log.info(
@@ -108,19 +143,29 @@ async function main() {
   }
 
   // -------- MODALITA' REALE: un runner per ogni account (numero) --------
-  const account = elencaAccount(config);
+  const { account, dinamico } = await elencaAccountEffettivi(config, sb);
   const gruppiClienti = distribuisci(clienti, account.length);
   const daChiudere = [];
   const schedulers = [];
 
-  for (let i = 0; i < account.length; i++) {
-    const acc = account[i];
+  if (dinamico) {
+    log.info(`Numeri gestiti dal pannello (Supabase): ${account.map((a) => a.id).join(', ')}.`);
+  }
+
+  // Avvia UN numero in modo indipendente. Non blocca gli altri: se questo
+  // numero e' nuovo e aspetta la scansione del QR, gli altri partono lo stesso
+  // (cosi' colleghi i numeri uno alla volta dal pannello, dal telefono).
+  const avviaUnAccount = async (acc, i) => {
     const id = acc.id || `num${i + 1}`;
-    log.info(`Avvio account "${id}"...`);
+    log.info(`Avvio account "${id}"${acc.proxyUrl ? ' (IP dedicato)' : ' (nessun IP!)'}...`);
+    if (sb) await aggiornaStatoAccount(sb, id, { stato: 'avvio' });
 
     // Ogni account salva i messaggi in arrivo sul PROPRIO inbox (numero giusto).
     const onMessaggio = creaGestoreArrivo(sb, id);
-    const client = await creaClient(config, { ...acc, id, onMessaggio });
+    // QR e stato di questo numero vanno nel pannello (lo colleghi dal telefono).
+    const onQr = sb ? (qr) => aggiornaStatoAccount(sb, id, { qr }) : null;
+    const onStato = sb ? (stato) => aggiornaStatoAccount(sb, id, { stato }) : null;
+    const client = await creaClient(config, { ...acc, id, onMessaggio, onQr, onStato });
     daChiudere.push(client);
 
     // Poller delle risposte: escono SEMPRE da questo account.
@@ -141,6 +186,38 @@ async function main() {
       onReport,
     });
     schedulers.push(scheduler);
+    await scheduler.avvia();
+  };
+
+  // -------- SUPERVISORE: nuovi numeri aggiunti dal pannello, senza PC --------
+  // Se i numeri arrivano da Supabase, ogni 30s controlla se ne hai aggiunto o
+  // tolto uno dal pannello: in quel caso riavvia il bot (pm2 lo rialza subito)
+  // cosi' il nuovo numero parte con il SUO IP e la SUA sessione. I numeri gia'
+  // collegati non richiedono di riscansionare il QR (la sessione resta salvata).
+  if (sb && !args.now) {
+    const chiaviIniziali = account.map((a) => a.id).sort().join('|');
+    setInterval(async () => {
+      try {
+        // 1) Numeri aggiunti/tolti dal pannello.
+        if (dinamico) {
+          const ora = await caricaAccountSupabase(sb);
+          const chiavi = ora.map((a) => a.id).sort().join('|');
+          if (chiavi !== chiaviIniziali) {
+            log.info('Elenco numeri cambiato dal pannello: riavvio per applicare.');
+            process.exit(0); // pm2 riavvia in automatico
+          }
+        }
+        // 2) Modalita' prova accesa/spenta o numero cambiato dal pannello.
+        const imp = await leggiImpostazioni(sb);
+        const chiave = `${imp.prova_abilitato === 'true' || imp.prova_abilitato === true}|${imp.prova_numero || ''}`;
+        if (chiaveImpostazioni && chiave !== chiaveImpostazioni) {
+          log.info('Impostazioni prova cambiate dal pannello: riavvio per applicare.');
+          process.exit(0);
+        }
+      } catch (_) {
+        /* riprova al prossimo giro */
+      }
+    }, 30000);
   }
 
   const chiusura = async () => {
@@ -158,8 +235,14 @@ async function main() {
   process.on('SIGINT', chiusura);
   process.on('SIGTERM', chiusura);
 
-  // Avvia in parallelo lo scheduler di outreach di ogni account.
-  await Promise.all(schedulers.map((s) => s.avvia()));
+  // Avvia ogni numero in parallelo e indipendente (un numero che aspetta il QR
+  // non blocca gli altri). Un errore su un numero non fa cadere gli altri.
+  const esiti = account.map((acc, i) =>
+    avviaUnAccount(acc, i).catch((err) =>
+      log.error(`Account "${acc.id || i}" fermato: ${err && err.message ? err.message : err}`)
+    )
+  );
+  await Promise.all(esiti);
 
   if (args.now) await chiusura();
 }

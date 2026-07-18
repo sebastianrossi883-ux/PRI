@@ -10,7 +10,7 @@
     "proxyUrl": ""
   },
 
-  "_account_commento": "MULTI-NUMERO (Fase 4). Lascia 'account' vuoto [] per usare il singolo numero della sezione 'baileys'. Per piu' numeri, riempi 'account' come in '_account_esempio': OGNI numero ha il SUO proxy (1 IP dedicato ciascuno!) e la SUA cartella sessione. Le risposte escono sempre dal numero che gestisce la conversazione.",
+  "_account_commento": "MULTI-NUMERO. Se Supabase e' attivo e la tabella 'account' ha righe, i numeri si gestiscono TUTTI DAL PANNELLO web (aggiungi numero + IP dal telefono, colleghi il QR dal pannello) e questa lista qui sotto viene ignorata. In alternativa (senza pannello) puoi elencarli qui: lascia 'account' vuoto [] per il singolo numero della sezione 'baileys', oppure riempilo come in '_account_esempio'. OGNI numero ha il SUO proxy (1 IP dedicato ciascuno!) e la SUA cartella sessione. Le risposte escono sempre dal numero che gestisce la conversazione.",
   "_account_esempio": [
     { "id": "num1", "numero": "393401111111", "proxyUrl": "http://utente:password@host1:porta", "cartellaSessione": "./.baileys-num1" },
     { "id": "num2", "numero": "393402222222", "proxyUrl": "http://utente:password@host2:porta", "cartellaSessione": "./.baileys-num2" }
@@ -20,6 +20,12 @@
   "inbox": {
     "_commento": "Fase 4: ogni quanti secondi il bot controlla la coda 'risposte_da_inviare' su Supabase e invia le tue risposte. Richiede Supabase abilitato.",
     "pollingSecondi": 10
+  },
+
+  "prova": {
+    "_commento": "MODALITA' PROVA: se 'abilitato' e' true, TUTTI i messaggi vengono inviati al tuo numero ('numero') invece che ai clienti reali. Serve per testare dopo modifiche, senza rischi. Puoi accenderla/spegnerla anche dal pannello web (ha la precedenza). Metti il numero con prefisso, es. 393401234567.",
+    "abilitato": false,
+    "numero": ""
   },
 
   "prefissoInternazionaleDefault": "39",

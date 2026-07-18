@@ -3,7 +3,7 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const $ = (id) => document.getElementById(id);
-let convAttiva = null, timerLista = null, timerChat = null;
+let convAttiva = null, timerLista = null, timerChat = null, timerNumeri = null, timerQr = null;
 
 /* ---------- Auth ---------- */
 $('loginForm').addEventListener('submit', async (e) => {
@@ -30,13 +30,15 @@ document.querySelectorAll('#nav .tab').forEach((b) => {
 });
 function apriView(v) {
   document.querySelectorAll('#nav .tab').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
-  ['inbox', 'clienti', 'messaggi', 'report'].forEach((k) => {
+  ['inbox', 'clienti', 'messaggi', 'numeri', 'report'].forEach((k) => {
     $('view-' + k).classList.toggle('hidden', k !== v);
   });
   if (timerLista) clearInterval(timerLista);
+  if (timerNumeri) clearInterval(timerNumeri);
   if (v === 'inbox') { caricaLista(); timerLista = setInterval(caricaLista, 6000); }
   if (v === 'clienti') caricaClienti();
   if (v === 'messaggi') caricaMessaggi();
+  if (v === 'numeri') { caricaNumeri(); caricaProva(); timerNumeri = setInterval(caricaNumeri, 5000); }
   if (v === 'report') caricaReport();
 }
 
@@ -202,6 +204,118 @@ async function aggiungiMessaggio() {
   $('messaggiMsg').textContent = 'Testo aggiunto.';
   $('nuovoTesto').value = '';
   caricaMessaggi();
+}
+
+/* ---------- NUMERI (account + IP) ---------- */
+$('btnAddAcc').onclick = aggiungiNumero;
+$('btnChiudiQr').onclick = chiudiQr;
+const etichettaStato = {
+  connesso: ['Connesso', 'ok'], qr: ['QR pronto', 'warn'], avvio: ['Avvio...', 'warn'],
+  riconnessione: ['Riconnetto...', 'warn'], in_attesa: ['In attesa', 'muted'],
+  disconnesso: ['Disconnesso', 'danger'],
+};
+async function caricaNumeri() {
+  const { data, error } = await sb.from('account')
+    .select('id,numero,proxy_url,attivo,stato').order('id');
+  const box = $('numeriList');
+  if (error) {
+    box.innerHTML = '<div class="empty">Tabella non trovata. Esegui la migrazione SQL (migrazione-fase5.sql) su Supabase.</div>';
+    return;
+  }
+  if (!data || !data.length) { box.innerHTML = '<div class="empty">Nessun numero. Aggiungine uno sopra.</div>'; return; }
+  box.innerHTML = '';
+  for (const a of data) {
+    const [txt, cls] = etichettaStato[a.stato] || [a.stato || '—', 'muted'];
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = '<div class="grow"><b>' + esc(a.id) + '</b> <span class="badge ' + cls + '">' + esc(txt) +
+      '</span><br><span class="num">' + esc(a.numero || '') + '</span>' +
+      (a.proxy_url ? '<br><span class="num">IP: ' + esc(mascheraProxy(a.proxy_url)) + '</span>' : '<br><span class="num danger">nessun IP</span>') + '</div>';
+    const azioni = document.createElement('div');
+    azioni.className = 'azioni';
+    const bQr = document.createElement('button');
+    bQr.textContent = a.stato === 'connesso' ? 'Ricollega' : 'Collega';
+    bQr.onclick = () => apriQr(a);
+    const bDel = document.createElement('button');
+    bDel.className = 'del'; bDel.textContent = 'Elimina';
+    bDel.onclick = async () => {
+      if (!confirm('Eliminare il numero ' + a.id + '? Verrà scollegato.')) return;
+      await sb.from('account').delete().eq('id', a.id);
+      caricaNumeri();
+    };
+    azioni.appendChild(bQr); azioni.appendChild(bDel);
+    row.appendChild(azioni);
+    box.appendChild(row);
+  }
+}
+function mascheraProxy(u) {
+  return String(u).replace(/\/\/([^:@/]+):([^@/]+)@/, '//$1:****@');
+}
+async function aggiungiNumero() {
+  const id = $('accId').value.trim().replace(/\s+/g, '');
+  const numero = normNum($('accNumero').value.trim());
+  const proxy = $('accProxy').value.trim();
+  if (!id) { $('numeriMsg').textContent = 'Metti un nome breve (es. num1).'; return; }
+  const { error } = await sb.from('account').upsert(
+    { id, numero, proxy_url: proxy, attivo: true, stato: 'in_attesa' }, { onConflict: 'id' });
+  if (error) { $('numeriMsg').textContent = 'Errore: ' + error.message; return; }
+  $('numeriMsg').textContent = 'Numero salvato. Premi "Collega" per il QR.';
+  $('accId').value = ''; $('accNumero').value = ''; $('accProxy').value = '';
+  caricaNumeri();
+}
+async function apriQr(a) {
+  $('qrModal').classList.remove('hidden');
+  $('qrTitolo').textContent = 'Collega ' + a.id;
+  $('qrArea').innerHTML = '<div class="muted small">Attendo il QR dal server (fino a ~30s)...</div>';
+  $('qrStato').textContent = '';
+  if (timerQr) clearInterval(timerQr);
+  let ultimo = '';
+  const tick = async () => {
+    const { data } = await sb.from('account').select('stato,qr').eq('id', a.id).single();
+    if (!data) return;
+    if (data.stato === 'connesso') {
+      $('qrArea').innerHTML = '<div class="ok-big">✓ Collegato!</div>';
+      $('qrStato').textContent = 'Numero connesso. Puoi chiudere.';
+      clearInterval(timerQr); timerQr = null; caricaNumeri(); return;
+    }
+    if (data.qr && data.qr !== ultimo) {
+      ultimo = data.qr;
+      $('qrArea').innerHTML = '<canvas id="qrCanvas"></canvas>';
+      try { await QRCode.toCanvas($('qrCanvas'), data.qr, { width: 260, margin: 1 }); }
+      catch (e) { $('qrArea').innerHTML = '<div class="danger small">Errore QR: ' + esc(e.message) + '</div>'; }
+      $('qrStato').textContent = 'Inquadra il QR ora.';
+    }
+  };
+  tick();
+  timerQr = setInterval(tick, 3000);
+}
+function chiudiQr() {
+  $('qrModal').classList.add('hidden');
+  if (timerQr) { clearInterval(timerQr); timerQr = null; }
+}
+
+/* ---------- PROVA ---------- */
+$('btnProva').onclick = salvaProva;
+async function caricaProva() {
+  const { data } = await sb.from('impostazioni').select('chiave,valore')
+    .in('chiave', ['prova_abilitato', 'prova_numero']);
+  const m = {};
+  (data || []).forEach((r) => { m[r.chiave] = r.valore; });
+  $('provaOn').checked = m.prova_abilitato === 'true';
+  $('provaNum').value = m.prova_numero || '';
+}
+async function salvaProva() {
+  const on = $('provaOn').checked;
+  const num = normNum($('provaNum').value.trim());
+  if (on && num.length < 8) { $('provaMsg').textContent = 'Metti un numero valido.'; return; }
+  const { error } = await sb.from('impostazioni').upsert([
+    { chiave: 'prova_abilitato', valore: on ? 'true' : 'false' },
+    { chiave: 'prova_numero', valore: num },
+  ], { onConflict: 'chiave' });
+  if (error) { $('provaMsg').textContent = 'Errore: ' + error.message; return; }
+  $('provaMsg').textContent = on
+    ? 'Prova ATTIVA: i messaggi vanno a ' + num + ' (attiva entro ~30s).'
+    : 'Prova spenta: i messaggi vanno ai clienti reali.';
 }
 
 /* ---------- REPORT ---------- */

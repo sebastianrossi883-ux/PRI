@@ -85,6 +85,58 @@ async function scriviReportSupabase(sb, dataKey, riepilogo) {
   if (error) log.warn('Supabase (report): ' + error.message);
 }
 
+/* ---------------- Fase 5: numeri (account) + IP + QR ---------------- */
+
+/**
+ * Carica gli account (numeri) dalla tabella 'account'. Ogni account porta il
+ * SUO proxy/IP dedicato e la SUA cartella di sessione isolata (derivata dall'id):
+ * cosi' i numeri non si confondono mai tra loro.
+ * Se la tabella non esiste ancora o e' vuota, restituisce [] (il bot usa
+ * allora il singolo numero della config).
+ */
+async function caricaAccountSupabase(sb) {
+  const { data, error } = await sb
+    .from('account')
+    .select('id,numero,proxy_url,attivo')
+    .order('id');
+  if (error) {
+    // Tabella non ancora creata: nessun blocco, si torna al singolo numero.
+    log.warn('Supabase (account): ' + error.message + ' — uso il numero della config.');
+    return [];
+  }
+  return (data || [])
+    .filter((a) => a && a.id && a.attivo !== false)
+    .map((a) => ({
+      id: String(a.id),
+      numero: a.numero || '',
+      proxyUrl: a.proxy_url || '',
+      // Cartella sessione ISOLATA per numero: non si mescolano mai.
+      cartellaSessione: `./.baileys-${String(a.id)}`,
+    }));
+}
+
+/**
+ * Legge le impostazioni gestibili dal pannello (tabella 'impostazioni',
+ * chiave/valore). Ritorna una mappa { chiave: valore }. Se la tabella non
+ * esiste, ritorna {} senza bloccare.
+ */
+async function leggiImpostazioni(sb) {
+  const { data, error } = await sb.from('impostazioni').select('chiave,valore');
+  if (error) return {};
+  const map = {};
+  for (const r of data || []) map[r.chiave] = r.valore;
+  return map;
+}
+
+/** Aggiorna stato e/o QR di un account (per mostrarli nel pannello). */
+async function aggiornaStatoAccount(sb, id, patch) {
+  const riga = { id: String(id), aggiornato_il: new Date().toISOString() };
+  if (Object.prototype.hasOwnProperty.call(patch, 'stato')) riga.stato = patch.stato;
+  if (Object.prototype.hasOwnProperty.call(patch, 'qr')) riga.qr = patch.qr;
+  const { error } = await sb.from('account').upsert(riga, { onConflict: 'id' });
+  if (error) log.warn('Supabase (stato account): ' + error.message);
+}
+
 /* ---------------- Fase 4: due vie (inbox + outbox) ---------------- */
 
 /** Salva un messaggio in arrivo e aggiorna la conversazione. */
@@ -136,6 +188,9 @@ module.exports = {
   caricaMessaggiSupabase,
   caricaBlocklistSupabase,
   scriviReportSupabase,
+  caricaAccountSupabase,
+  aggiornaStatoAccount,
+  leggiImpostazioni,
   salvaMessaggioRicevuto,
   prendiRisposteDaInviare,
   segnaRisposta,

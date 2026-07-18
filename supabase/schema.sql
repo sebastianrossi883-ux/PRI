@@ -81,6 +81,31 @@ create table if not exists risposte_da_inviare (
 create index if not exists idx_ricevuti_conv on messaggi_ricevuti (account_id, numero_cliente);
 create index if not exists idx_outbox_pending on risposte_da_inviare (account_id, stato);
 
+-- ============================================================
+-- FASE 5: numeri (account) + IP dedicato + QR dal pannello
+-- ============================================================
+
+-- Un numero WhatsApp = un account. Ogni numero ha il SUO IP (proxy_url) e la
+-- SUA sessione isolata sul server (cartella .baileys-<id>): non si confondono.
+-- 'qr' e 'stato' li scrive il bot, il pannello li mostra per collegare i numeri
+-- dal telefono (Dispositivi collegati -> inquadra il QR nel pannello).
+create table if not exists account (
+  id            text primary key,          -- es. num1, num2 (senza spazi)
+  numero        text,                       -- il tuo numero (solo etichetta)
+  proxy_url     text,                        -- IP dedicato: http://utente:password@host:porta
+  attivo        boolean not null default true,
+  stato         text not null default 'in_attesa', -- in_attesa|avvio|qr|connesso|riconnessione|disconnesso
+  qr            text,                        -- stringa QR (mostrata come immagine nel pannello)
+  aggiornato_il timestamptz not null default now()
+);
+
+-- Impostazioni gestibili dal pannello (chiave/valore). Usata per la MODALITA'
+-- PROVA: prova_abilitato = 'true'/'false', prova_numero = tuo numero.
+create table if not exists impostazioni (
+  chiave text primary key,
+  valore text
+);
+
 -- NOTA sicurezza: il bot userà la "service role key" (lato server, segreta).
 -- Se poi colleghi Lovable/Vercel, valuta di attivare Row Level Security (RLS) e
 -- policy adeguate per l'accesso dal browser.

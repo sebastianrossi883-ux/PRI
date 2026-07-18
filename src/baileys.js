@@ -38,6 +38,10 @@ function creaClientBaileys(config, account = {}) {
       account.proxyUrl || bcfg.proxyUrl || (config.proxy && config.proxy.url) || '';
     // Callback opzionale per i messaggi in arrivo (Fase 4).
     const onMessaggio = account.onMessaggio;
+    // Callback opzionali per mostrare QR e stato nel pannello web (Fase 5).
+    const onQr = account.onQr;
+    const onStato = account.onStato;
+    const notificaStato = (s) => { try { if (onStato) onStato(s); } catch (_) {} };
 
     // Costruisce l'agente proxy in base al protocollo (http/https/socks).
     let agent;
@@ -113,9 +117,15 @@ function creaClientBaileys(config, account = {}) {
           if (u.qr) {
             log.info('Scansiona questo QR con WhatsApp (Dispositivi collegati):');
             qrcode.generate(u.qr, { small: true });
+            // Manda il QR al pannello web: lo scansioni dal telefono, senza PC.
+            try { if (onQr) onQr(u.qr); } catch (_) {}
+            notificaStato('qr');
           }
           if (u.connection === 'open') {
             log.ok('Connessione WhatsApp aperta (Baileys).');
+            // Numero collegato: azzera il QR e segna "connesso" nel pannello.
+            try { if (onQr) onQr(null); } catch (_) {}
+            notificaStato('connesso');
             if (!risolto) {
               risolto = true;
               resolve(adattatore(holder));
@@ -126,12 +136,15 @@ function creaClientBaileys(config, account = {}) {
               && u.lastDisconnect.error.output && u.lastDisconnect.error.output.statusCode;
             if (code === DisconnectReason.loggedOut) {
               log.error('Sessione disconnessa (logout). Cancella la cartella ' + authDir + ' e riscansiona.');
+              notificaStato('disconnesso');
               if (!risolto) {
                 risolto = true;
                 reject(new Error('WhatsApp logout'));
               }
             } else {
+              // NON si arrende mai: riconnette da solo (auto-riconnessione).
               log.warn('Connessione WhatsApp chiusa: riconnetto tra 5s...');
+              notificaStato('riconnessione');
               setTimeout(avvia, 5000);
             }
           }
