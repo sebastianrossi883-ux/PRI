@@ -148,16 +148,31 @@ async function salvaMessaggioRicevuto(sb, accountId, numero, testo) {
   });
   if (e1) throw new Error('Supabase (ricevuti): ' + e1.message);
 
+  // Se il numero è tra i tuoi clienti, mostriamo il NOME invece del numero.
+  let nome = null;
+  try {
+    const { data } = await sb
+      .from('clienti')
+      .select('nome')
+      .eq('numero', numero)
+      .limit(1)
+      .maybeSingle();
+    if (data && data.nome) nome = data.nome;
+  } catch (_) {
+    /* se non lo troviamo, resta il numero */
+  }
+
   // Aggiorna/crea la conversazione (legata a questo account = numero giusto).
-  const { error: e2 } = await sb.from('conversazioni').upsert(
-    {
-      account_id: accountId,
-      numero_cliente: numero,
-      ultimo_testo: testo || '',
-      ultimo_il: new Date().toISOString(),
-    },
-    { onConflict: 'account_id,numero_cliente' }
-  );
+  const riga = {
+    account_id: accountId,
+    numero_cliente: numero,
+    ultimo_testo: testo || '',
+    ultimo_il: new Date().toISOString(),
+  };
+  if (nome) riga.nome = nome; // scriviamo il nome solo se trovato (non lo azzeriamo)
+  const { error: e2 } = await sb.from('conversazioni').upsert(riga, {
+    onConflict: 'account_id,numero_cliente',
+  });
   if (e2) throw new Error('Supabase (conversazioni): ' + e2.message);
 }
 
