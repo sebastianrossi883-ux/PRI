@@ -9,6 +9,7 @@ const {
   orarioInMinuti,
   dataOggiAMinuti,
   chiaveGiorno,
+  mescola,
 } = require('./utils');
 
 /**
@@ -90,6 +91,25 @@ class Scheduler {
     this.avviaSubito = avviaSubito;
     this.onReport = onReport; // callback opzionale (es. scrittura su Supabase)
     this.attivo = true;
+    this._mazzo = []; // "mazzo" di messaggi mescolato (per non ripetere l'ordine)
+  }
+
+  /**
+   * Restituisce il prossimo template pescandolo da un mazzo mescolato: usa tutte
+   * le varianti prima di ripetere, e a ogni giro rimescola. Cosi' l'ordine
+   * cambia sempre e nessun testo si ripete a ridosso del precedente.
+   */
+  _prossimoMessaggio() {
+    if (this._mazzo.length === 0) {
+      this._mazzo = mescola(this.messaggi);
+      // Evita che l'ultimo del giro precedente sia anche il primo del nuovo.
+      if (this._mazzo.length > 1 && this._mazzo[0] === this._ultimoTesto) {
+        this._mazzo.push(this._mazzo.shift());
+      }
+    }
+    const testo = this._mazzo.shift();
+    this._ultimoTesto = testo;
+    return testo;
   }
 
   async avvia() {
@@ -243,7 +263,7 @@ class Scheduler {
 
       const indice = this.stato.cursoreCliente() % totaleClienti;
       const cliente = this.clienti[indice];
-      const template = this.messaggi[randomInt(0, this.messaggi.length - 1)];
+      const template = this._prossimoMessaggio();
 
       const esito = await this.sender.invia(cliente, template);
       if (esito.ok) {

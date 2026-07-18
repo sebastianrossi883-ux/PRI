@@ -90,9 +90,11 @@ let timerLista = null, timerChat = null;
 const $ = (id) => document.getElementById(id);
 const statusEl = $('status');
 
-// Ripristina config salvata
-$('cfgUrl').value = localStorage.getItem('sb_url') || '';
-$('cfgKey').value = localStorage.getItem('sb_key') || '';
+// Config precompilata del progetto Supabase (anon key = pubblica per natura)
+const DEFAULT_URL = 'https://zqoiudqsqxqatfsmzvze.supabase.co';
+const DEFAULT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxb2l1ZHFzcXhxYXRmc216dnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMjQyMjUsImV4cCI6MjA5OTkwMDIyNX0.3T5bKiiciGfd9hIlqHPUC8jqoiMBOMlDeWi7KGPIfNQ';
+$('cfgUrl').value = localStorage.getItem('sb_url') || DEFAULT_URL;
+$('cfgKey').value = localStorage.getItem('sb_key') || DEFAULT_KEY;
 
 $('btnSave').onclick = collega;
 $('btnSend').onclick = inviaRisposta;
