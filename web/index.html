@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Inbox Bot Clienti</title>
+<title>Pannello Bot Clienti</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+<!-- LOGIN -->
 <div class="login-wrap" id="loginWrap">
   <form class="login" id="loginForm">
-    <h2>Inbox Bot Clienti</h2>
+    <h2>Pannello Bot Clienti</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="username" required />
     <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
     <div class="err" id="loginErr"></div>
@@ -17,23 +19,68 @@
   </form>
 </div>
 
+<!-- APP -->
 <div id="app" class="hidden">
   <header>
-    <h1>Inbox Bot Clienti</h1>
+    <strong class="brand">Bot Clienti</strong>
+    <nav id="nav">
+      <button data-view="inbox" class="tab active">Messaggi</button>
+      <button data-view="clienti" class="tab">Clienti</button>
+      <button data-view="messaggi" class="tab">Testi</button>
+      <button data-view="report" class="tab">Report</button>
+    </nav>
     <span class="status" id="status"></span>
     <button class="ghost" id="btnLogout">Esci</button>
   </header>
-  <div class="layout">
-    <div class="list" id="list"><div class="empty">Caricamento...</div></div>
-    <div class="chat">
-      <div class="head" id="chatHead"><span class="empty muted">Seleziona una conversazione</span></div>
-      <div class="messages" id="messages"></div>
-      <div class="composer">
-        <textarea id="reply" placeholder="Scrivi una risposta (esce dal numero della conversazione)"></textarea>
-        <button id="btnSend">Invia</button>
+
+  <!-- VIEW: INBOX -->
+  <section id="view-inbox" class="view">
+    <div class="layout">
+      <div class="list" id="list"><div class="empty">Caricamento...</div></div>
+      <div class="chat">
+        <div class="head" id="chatHead"><span class="empty muted">Seleziona una conversazione</span></div>
+        <div class="messages" id="messages"></div>
+        <div class="composer">
+          <textarea id="reply" placeholder="Scrivi una risposta..."></textarea>
+          <button id="btnSend">Invia</button>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- VIEW: CLIENTI -->
+  <section id="view-clienti" class="view hidden">
+    <div class="pane">
+      <h3>Aggiungi clienti</h3>
+      <p class="muted small">Incolla i numeri, uno per riga. Formato: <code>Nome,numero</code> oppure solo il numero. Il prefisso 39 viene aggiunto se manca.</p>
+      <textarea id="bulk" rows="5" placeholder="Bar Centrale,3401234567&#10;3487654321&#10;..."></textarea>
+      <button id="btnBulk">Aggiungi alla lista</button>
+      <div class="msg" id="clientiMsg"></div>
+      <h3>Lista clienti (<span id="clientiCount">0</span>)</h3>
+      <div id="clientiList" class="rows"><div class="empty">Caricamento...</div></div>
+    </div>
+  </section>
+
+  <!-- VIEW: MESSAGGI -->
+  <section id="view-messaggi" class="view hidden">
+    <div class="pane">
+      <h3>Aggiungi un testo</h3>
+      <p class="muted small">Usa <code>{nome}</code> per inserire il nome del cliente.</p>
+      <textarea id="nuovoTesto" rows="3" placeholder="Salve, parlo con {nome}? Sono uno studente..."></textarea>
+      <button id="btnAddMsg">Aggiungi testo</button>
+      <div class="msg" id="messaggiMsg"></div>
+      <h3>Testi attivi (<span id="messaggiCount">0</span>)</h3>
+      <div id="messaggiList" class="rows"><div class="empty">Caricamento...</div></div>
+    </div>
+  </section>
+
+  <!-- VIEW: REPORT -->
+  <section id="view-report" class="view hidden">
+    <div class="pane">
+      <h3>Report giornaliero</h3>
+      <div id="reportList" class="rows"><div class="empty">Caricamento...</div></div>
+    </div>
+  </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
