@@ -4,75 +4,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Inbox Bot Clienti</title>
-<style>
-  :root {
-    --bg: #f4f5f7; --panel: #ffffff; --border: #e2e5ea; --text: #1c2430;
-    --muted: #6b7480; --accent: #2563eb; --accent-text: #fff;
-    --in: #eef1f5; --out: #dcf5e4;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f141a; --panel: #171e26; --border: #2a333d; --text: #e7ecf2;
-      --muted: #93a0ad; --accent: #3b82f6; --accent-text: #fff;
-      --in: #212a33; --out: #1f3a2c;
-    }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
-  header { padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--border);
-    display: flex; gap: 8px; align-items: center; }
-  header h1 { font-size: 16px; margin: 0 auto 0 0; }
-  header input, .login input { background: var(--bg); color: var(--text); border: 1px solid var(--border);
-    border-radius: 8px; padding: 6px 8px; font-size: 13px; }
-  button { background: var(--accent); color: var(--accent-text); border: 0; border-radius: 8px;
-    padding: 7px 12px; font-size: 13px; cursor: pointer; }
-  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .layout { flex: 1; display: flex; min-height: 0; }
-  .list { width: 320px; border-right: 1px solid var(--border); overflow-y: auto; background: var(--panel); }
-  .conv { padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .conv:hover { background: var(--bg); }
-  .conv.active { background: var(--bg); border-left: 3px solid var(--accent); }
-  .conv .top { display: flex; justify-content: space-between; gap: 8px; }
-  .conv .name { font-weight: 600; font-size: 14px; }
-  .conv .badge { font-size: 11px; color: var(--muted); border: 1px solid var(--border);
-    border-radius: 20px; padding: 1px 8px; white-space: nowrap; }
-  .conv .last { color: var(--muted); font-size: 13px; margin-top: 3px; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap; }
-  .chat { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  .chat .head { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
-    display: flex; gap: 10px; align-items: baseline; }
-  .messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .bubble { max-width: 72%; padding: 8px 12px; border-radius: 12px; font-size: 14px; line-height: 1.35;
-    white-space: pre-wrap; word-wrap: break-word; }
-  .bubble.in { align-self: flex-start; background: var(--in); border-bottom-left-radius: 3px; }
-  .bubble.out { align-self: flex-end; background: var(--out); border-bottom-right-radius: 3px; }
-  .bubble .meta { font-size: 10px; color: var(--muted); margin-top: 4px; }
-  .composer { padding: 12px; border-top: 1px solid var(--border); background: var(--panel); display: flex; gap: 8px; }
-  .composer textarea { flex: 1; resize: none; height: 44px; border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px; font-family: inherit; font-size: 14px; background: var(--bg); color: var(--text); }
-  .empty { margin: auto; color: var(--muted); text-align: center; padding: 20px; }
-  .status { font-size: 12px; color: var(--muted); }
-  /* Login */
-  .login-wrap { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10; }
-  .login { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 26px;
-    width: 320px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.15); }
-  .login h2 { margin: 0; font-size: 18px; }
-  .login input { padding: 10px; font-size: 14px; }
-  .login .err { color: #dc2626; font-size: 13px; min-height: 16px; }
-  .hidden { display: none !important; }
-  @media (max-width: 720px) {
-    .list { width: 100%; } .chat { display: none; }
-    body.mobile-chat .list { display: none; } body.mobile-chat .chat { display: flex; }
-  }
-</style>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<!-- LOGIN -->
 <div class="login-wrap" id="loginWrap">
   <form class="login" id="loginForm">
-    <h2>📥 Inbox Bot Clienti</h2>
+    <h2>Inbox Bot Clienti</h2>
     <input type="email" id="email" placeholder="Email" autocomplete="username" required />
     <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
     <div class="err" id="loginErr"></div>
@@ -80,20 +17,19 @@
   </form>
 </div>
 
-<!-- APP -->
-<div id="app" class="hidden" style="display:flex;flex-direction:column;height:100vh">
+<div id="app" class="hidden">
   <header>
-    <h1>📥 Inbox Bot Clienti</h1>
+    <h1>Inbox Bot Clienti</h1>
     <span class="status" id="status"></span>
     <button class="ghost" id="btnLogout">Esci</button>
   </header>
   <div class="layout">
     <div class="list" id="list"><div class="empty">Caricamento...</div></div>
     <div class="chat">
-      <div class="head" id="chatHead"><span class="empty" style="margin:0;color:var(--muted)">Seleziona una conversazione</span></div>
+      <div class="head" id="chatHead"><span class="empty muted">Seleziona una conversazione</span></div>
       <div class="messages" id="messages"></div>
       <div class="composer">
-        <textarea id="reply" placeholder="Scrivi una risposta... (esce dal numero della conversazione)"></textarea>
+        <textarea id="reply" placeholder="Scrivi una risposta (esce dal numero della conversazione)"></textarea>
         <button id="btnSend">Invia</button>
       </div>
     </div>
@@ -101,123 +37,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPA_URL = 'https://zqoiudqsqxqatfsmzvze.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxb2l1ZHFzcXhxYXRmc216dnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMjQyMjUsImV4cCI6MjA5OTkwMDIyNX0.3T5bKiiciGfd9hIlqHPUC8jqoiMBOMlDeWi7KGPIfNQ';
-const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-
-const $ = (id) => document.getElementById(id);
-let convAttiva = null, timerLista = null, timerChat = null;
-
-// ---- Auth ----
-$('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  $('loginErr').textContent = '';
-  const { error } = await sb.auth.signInWithPassword({
-    email: $('email').value.trim(), password: $('password').value,
-  });
-  if (error) { $('loginErr').textContent = 'Accesso negato: ' + error.message; return; }
-  mostraApp();
-});
-$('btnLogout').onclick = async () => { await sb.auth.signOut(); mostraLogin(); };
-
-function mostraApp() {
-  $('loginWrap').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  caricaLista();
-  if (timerLista) clearInterval(timerLista);
-  timerLista = setInterval(caricaLista, 6000);
-}
-function mostraLogin() {
-  if (timerLista) clearInterval(timerLista);
-  if (timerChat) clearInterval(timerChat);
-  $('app').classList.add('hidden');
-  $('loginWrap').classList.remove('hidden');
-}
-
-// Sessione gia' attiva? (rimane salvata tra le visite)
-sb.auth.getSession().then(({ data }) => { if (data.session) mostraApp(); });
-
-// ---- Inbox ----
-$('btnSend').onclick = inviaRisposta;
-$('reply').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) inviaRisposta();
-});
-
-async function caricaLista() {
-  const { data, error } = await sb.from('conversazioni')
-    .select('id,account_id,numero_cliente,nome,ultimo_testo,ultimo_il')
-    .order('ultimo_il', { ascending: false }).limit(200);
-  if (error) { $('status').textContent = 'errore: ' + error.message; return; }
-  $('status').textContent = '';
-  const list = $('list');
-  if (!data || !data.length) { list.innerHTML = '<div class="empty">Nessuna conversazione ancora.</div>'; return; }
-  list.innerHTML = '';
-  for (const c of data) {
-    const div = document.createElement('div');
-    div.className = 'conv' + (convAttiva && convAttiva.id === c.id ? ' active' : '');
-    div.innerHTML = `<div class="top"><span class="name">${esc(c.nome || c.numero_cliente)}</span>
-      <span class="badge">${esc(c.account_id)}</span></div>
-      <div class="last">${esc(c.ultimo_testo || '')}</div>`;
-    div.onclick = () => apri(c);
-    list.appendChild(div);
-  }
-}
-
-async function apri(c) {
-  convAttiva = c;
-  document.body.classList.add('mobile-chat');
-  $('chatHead').innerHTML =
-    `<button class="ghost" onclick="document.body.classList.remove('mobile-chat')">‹</button>
-     <strong>${esc(c.nome || c.numero_cliente)}</strong>
-     <span class="status">${esc(c.numero_cliente)} · via ${esc(c.account_id)}</span>`;
-  await caricaChat();
-  if (timerChat) clearInterval(timerChat);
-  timerChat = setInterval(caricaChat, 4000);
-}
-
-async function caricaChat() {
-  if (!convAttiva) return;
-  const c = convAttiva;
-  const [ric, risp] = await Promise.all([
-    sb.from('messaggi_ricevuti').select('testo,ricevuto_il')
-      .eq('account_id', c.account_id).eq('numero_cliente', c.numero_cliente)
-      .order('ricevuto_il', { ascending: true }).limit(500),
-    sb.from('risposte_da_inviare').select('testo,creato_il,stato')
-      .eq('account_id', c.account_id).eq('numero_cliente', c.numero_cliente)
-      .order('creato_il', { ascending: true }).limit(500),
-  ]);
-  const items = [];
-  (ric.data || []).forEach((m) => items.push({ dir: 'in', testo: m.testo, t: m.ricevuto_il }));
-  (risp.data || []).forEach((m) => items.push({ dir: 'out', testo: m.testo, t: m.creato_il, stato: m.stato }));
-  items.sort((a, b) => new Date(a.t) - new Date(b.t));
-  const box = $('messages');
-  box.innerHTML = '';
-  for (const it of items) {
-    const d = document.createElement('div');
-    d.className = 'bubble ' + it.dir;
-    d.innerHTML = esc(it.testo) + `<div class="meta">${ora(it.t)}${it.dir === 'out' ? ' · ' + esc(it.stato || '') : ''}</div>`;
-    box.appendChild(d);
-  }
-  box.scrollTop = box.scrollHeight;
-}
-
-async function inviaRisposta() {
-  if (!convAttiva) { alert('Seleziona una conversazione.'); return; }
-  const testo = $('reply').value.trim();
-  if (!testo) return;
-  const c = convAttiva;
-  const { error } = await sb.from('risposte_da_inviare').insert({
-    account_id: c.account_id, numero_cliente: c.numero_cliente, testo, stato: 'pending',
-  });
-  if (error) { alert('Errore invio: ' + error.message); return; }
-  $('reply').value = '';
-  caricaChat();
-}
-
-function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"]/g,
-  (x) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[x])); }
-function ora(t) { try { return new Date(t).toLocaleString('it-IT', { hour12: false }); } catch { return ''; } }
-</script>
+<script src="app.js"></script>
 </body>
 </html>
