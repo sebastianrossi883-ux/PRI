@@ -103,8 +103,16 @@ function creaClientBaileys(config, account = {}) {
                 if (!msg.message || (msg.key && msg.key.fromMe)) continue;
                 const jid = msg.key && msg.key.remoteJid;
                 if (!jid || jid.endsWith('@g.us') || jid === 'status@broadcast') continue;
-                const numero = jid.split('@')[0];
+                // WhatsApp a volte usa un ID privacy "@lid" al posto del numero.
+                // In quel caso il numero VERO arriva in un campo alternativo:
+                // lo recuperiamo per mostrarlo e per abbinarlo ai clienti.
+                const alt =
+                  (msg.key && (msg.key.remoteJidAlt || msg.key.senderPn || msg.key.participantPn)) || '';
+                const numero = jid.endsWith('@lid')
+                  ? (alt ? alt.split('@')[0] : jid.split('@')[0])
+                  : jid.split('@')[0];
                 const testo = estraiTesto(msg.message);
+                // 'jid' e' la chat esatta a cui rispondere (anche se e' un @lid).
                 await onMessaggio({ numero, testo, jid, msg });
               } catch (e) {
                 log.warn('Errore gestione messaggio in arrivo:', e.message);
@@ -176,8 +184,13 @@ function estraiTesto(message) {
  * Usa 'holder.sock' cosi' dopo una riconnessione punta sempre al socket attuale.
  */
 function adattatore(holder) {
-  const toJid = (chatId) =>
-    String(chatId).replace('@c.us', '@s.whatsapp.net');
+  const toJid = (chatId) => {
+    const s = String(chatId);
+    // Se e' gia' un jid completo (@lid o @s.whatsapp.net) lo uso cosi' com'e':
+    // per i contatti "privacy" (@lid) e' l'unico modo di rispondere alla chat giusta.
+    if (s.includes('@')) return s.endsWith('@c.us') ? s.replace('@c.us', '@s.whatsapp.net') : s;
+    return s + '@s.whatsapp.net';
+  };
 
   return {
     async sendText(chatId, testo) {

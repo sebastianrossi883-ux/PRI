@@ -140,7 +140,7 @@ async function aggiornaStatoAccount(sb, id, patch) {
 /* ---------------- Fase 4: due vie (inbox + outbox) ---------------- */
 
 /** Salva un messaggio in arrivo e aggiorna la conversazione. */
-async function salvaMessaggioRicevuto(sb, accountId, numero, testo) {
+async function salvaMessaggioRicevuto(sb, accountId, numero, testo, jid) {
   const { error: e1 } = await sb.from('messaggi_ricevuti').insert({
     account_id: accountId,
     numero_cliente: numero,
@@ -170,10 +170,33 @@ async function salvaMessaggioRicevuto(sb, accountId, numero, testo) {
     ultimo_il: new Date().toISOString(),
   };
   if (nome) riga.nome = nome; // scriviamo il nome solo se trovato (non lo azzeriamo)
-  const { error: e2 } = await sb.from('conversazioni').upsert(riga, {
+  if (jid) riga.jid = jid; // chat esatta a cui rispondere (gestisce i contatti @lid)
+  let { error: e2 } = await sb.from('conversazioni').upsert(riga, {
     onConflict: 'account_id,numero_cliente',
   });
+  // Se la colonna 'jid' non esiste ancora, riprova senza (retrocompatibile).
+  if (e2 && /jid/i.test(e2.message)) {
+    delete riga.jid;
+    ({ error: e2 } = await sb.from('conversazioni').upsert(riga, {
+      onConflict: 'account_id,numero_cliente',
+    }));
+  }
   if (e2) throw new Error('Supabase (conversazioni): ' + e2.message);
+}
+
+/** Ritorna il jid esatto a cui rispondere per una conversazione (o null). */
+async function jidPerConversazione(sb, accountId, numero) {
+  try {
+    const { data } = await sb
+      .from('conversazioni')
+      .select('jid')
+      .eq('account_id', accountId)
+      .eq('numero_cliente', numero)
+      .maybeSingle();
+    return data && data.jid ? data.jid : null;
+  } catch (_) {
+    return null; // colonna assente o errore: si usa il fallback
+  }
 }
 
 /** Prende le risposte in coda per questo account (da inviare). */
@@ -207,6 +230,7 @@ module.exports = {
   aggiornaStatoAccount,
   leggiImpostazioni,
   salvaMessaggioRicevuto,
+  jidPerConversazione,
   prendiRisposteDaInviare,
   segnaRisposta,
 };

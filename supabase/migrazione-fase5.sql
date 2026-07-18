@@ -22,6 +22,10 @@ create table if not exists impostazioni (
   valore text
 );
 
+-- Chat esatta a cui rispondere (gestisce i contatti "privacy" @lid di WhatsApp,
+-- che nascondono il numero vero). Se assente, si risponde al numero.
+alter table conversazioni add column if not exists jid text;
+
 -- Valori iniziali: modalità prova spenta, invii NON in pausa.
 insert into impostazioni (chiave, valore) values
   ('prova_abilitato', 'false'),

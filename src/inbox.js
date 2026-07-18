@@ -1,16 +1,21 @@
 'use strict';
 
 const log = require('./logger');
-const { salvaMessaggioRicevuto, prendiRisposteDaInviare, segnaRisposta } = require('./supabase');
+const {
+  salvaMessaggioRicevuto,
+  jidPerConversazione,
+  prendiRisposteDaInviare,
+  segnaRisposta,
+} = require('./supabase');
 
 /**
  * Costruisce la callback per i messaggi in arrivo di un account:
  * salva su Supabase senza inviare ricevute di lettura (niente spunte blu).
  */
 function creaGestoreArrivo(sb, accountId) {
-  return async ({ numero, testo }) => {
+  return async ({ numero, testo, jid }) => {
     if (!sb) return; // senza Supabase non c'e' inbox dove salvare
-    await salvaMessaggioRicevuto(sb, accountId, numero, testo);
+    await salvaMessaggioRicevuto(sb, accountId, numero, testo, jid);
     log.info(`[${accountId}] messaggio ricevuto da ${numero}: "${(testo || '').slice(0, 60)}"`);
   };
 }
@@ -31,7 +36,11 @@ function avviaOutbox(sb, accountId, client, config) {
       const risposte = await prendiRisposteDaInviare(sb, accountId);
       for (const r of risposte) {
         try {
-          await client.sendText(`${r.numero_cliente}@c.us`, r.testo);
+          // Rispondiamo alla chat ESATTA salvata (gestisce i contatti @lid);
+          // se non c'e' un jid salvato, ripieghiamo sul numero.
+          const jid = await jidPerConversazione(sb, accountId, r.numero_cliente);
+          const destinazione = jid || `${r.numero_cliente}@c.us`;
+          await client.sendText(destinazione, r.testo);
           await segnaRisposta(sb, r.id, 'inviato');
           log.ok(`[${accountId}] risposta inviata a ${r.numero_cliente}`);
         } catch (e) {
