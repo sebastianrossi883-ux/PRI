@@ -12,7 +12,12 @@ $('loginForm').addEventListener('submit', async (e) => {
   const { error } = await sb.auth.signInWithPassword({
     email: $('email').value.trim(), password: $('password').value,
   });
-  if (error) { $('loginErr').textContent = 'Accesso negato: ' + error.message; return; }
+  if (error) {
+    console.error('Login error:', error);
+    $('loginErr').textContent = 'Accesso negato: ' +
+      (error.message || error.error_description || 'controlla email e password');
+    return;
+  }
   mostraApp();
 });
 $('btnLogout').onclick = async () => { await sb.auth.signOut(); location.reload(); };
