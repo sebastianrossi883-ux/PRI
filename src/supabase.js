@@ -111,7 +111,10 @@ async function caricaAccountSupabase(sb) {
       numero: a.numero || '',
       proxyUrl: a.proxy_url || '',
       // Cartella sessione ISOLATA per numero: non si mescolano mai.
-      cartellaSessione: `./.baileys-${String(a.id)}`,
+      // Per 'default' NON forziamo la cartella: resta quella di config
+      // (./.baileys-auth), cosi' la sessione gia' collegata non va persa.
+      cartellaSessione:
+        String(a.id) === 'default' ? '' : `./.baileys-${String(a.id)}`,
     }));
 }
 
