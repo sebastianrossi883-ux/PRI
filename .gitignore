@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Segreti e config locale
+.env
+config.yaml
+google-service-account.json
+*.json.key
+.stitch_profile/
+
+# Dati di lavoro
+state.json
+output/
+material/*/
+!material/.gitkeep
+!material/esempio_job/

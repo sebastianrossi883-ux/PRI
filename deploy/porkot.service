@@ -1,0 +1,17 @@
+[Unit]
+Description=Porkot -> Stitch (generazione e consegna automatica)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adatta utente e percorsi alla tua VM Oracle:
+User=ubuntu
+WorkingDirectory=/home/ubuntu/PRI
+EnvironmentFile=/home/ubuntu/PRI/.env
+ExecStart=/home/ubuntu/PRI/.venv/bin/python -m src.main
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

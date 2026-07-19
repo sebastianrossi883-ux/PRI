@@ -1,0 +1,55 @@
+# Copia questo file in "config.yaml" e adatta i valori.
+
+# Ogni quanti secondi ricontrollare se ci sono job nuovi.
+poll_interval_seconds: 60
+
+# Da dove arriva il materiale: "local" oppure "gdrive".
+source:
+  type: local
+
+  # --- Opzioni per type: local ---
+  # Cartella che contiene una sottocartella per ogni job.
+  local_dir: ./material
+
+  # --- Opzioni per type: gdrive ---
+  # ID della cartella Google Drive (lo trovi nell'URL della cartella).
+  # gdrive_folder_id: "1AbCdEfGhIjKlMnOpQrStUvWxYz"
+  # Dove scaricare i job prima di elaborarli.
+  # download_dir: ./material
+
+# Come generare il prompt.
+prompt:
+  # Modello Claude usato per scrivere il prompt.
+  model: claude-opus-4-8
+  # Istruzione di sistema: come deve essere il prompt per Stitch.
+  system: >
+    Sei un assistente che trasforma la descrizione di un'animazione e le sue
+    immagini di reference in un prompt chiaro, dettagliato e pronto da incollare
+    in Stitch. Scrivi in italiano. Sii concreto su stile, colori, movimento,
+    ritmo e riferimenti visivi. Restituisci SOLO il prompt finale, senza premesse.
+
+# Come consegnare il prompt a Stitch.
+stitch:
+  # "browser" -> va DAVVERO sul sito di Stitch e incolla il prompt (Playwright)
+  # "export"  -> salva solo il prompt in output/ (per provare senza browser)
+  # "api"     -> invia a un tuo endpoint HTTP
+  mode: browser
+  output_dir: ./output
+
+  # Opzioni per mode: browser
+  browser:
+    url: "https://stitch.withgoogle.com/"
+    # Cartella dove viene salvato il login (dopo `python -m src.login_stitch`).
+    user_data_dir: ./.stitch_profile
+    # true su Oracle (nessuno schermo); false se vuoi vedere cosa fa.
+    headless: true
+    # Selettori dell'interfaccia di Stitch: DA VERIFICARE/ADATTARE.
+    prompt_selector: "textarea"
+    submit_selector: "button[type=submit]"
+    upload_selector: "input[type=file]"
+    ready_selector: "textarea"
+    post_submit_wait_ms: 4000
+
+  # Solo per mode: api
+  # api_url: "https://il-tuo-endpoint.example/stitch"
+  # api_token: ""

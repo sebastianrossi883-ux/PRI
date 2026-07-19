@@ -1,0 +1,7 @@
+anthropic>=0.40
+PyYAML>=6.0
+# Per andare sul sito di Stitch (consegna in modalita' "browser"):
+playwright>=1.40
+# Solo se usi Google Drive come sorgente:
+google-api-python-client>=2.100
+google-auth>=2.30
