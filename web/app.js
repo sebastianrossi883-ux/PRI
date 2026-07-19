@@ -405,6 +405,30 @@ async function salvaPausa() {
 
 /* ---------- PROVA ---------- */
 $('btnProva').onclick = salvaProva;
+$('btnProvaOra').onclick = inviaProvaOra;
+// Restituisce l'id di un account connesso (o 'default' se non c'e' la tabella).
+async function accountAttivo() {
+  try {
+    const { data } = await sb.from('account').select('id,stato').order('id');
+    if (data && data.length) {
+      const c = data.find((a) => a.stato === 'connesso') || data[0];
+      return c.id;
+    }
+  } catch (e) { /* tabella assente */ }
+  return 'default';
+}
+async function inviaProvaOra() {
+  const num = normNum($('provaNum').value.trim());
+  if (num.length < 8) { $('provaMsg').textContent = 'Scrivi prima il tuo numero qui sopra.'; return; }
+  $('provaMsg').textContent = 'Invio in corso...';
+  const acc = await accountAttivo();
+  const testo = 'Messaggio di prova dal pannello ✅ (' + new Date().toLocaleTimeString('it-IT') + ')';
+  const { error } = await sb.from('risposte_da_inviare').insert({
+    account_id: acc, numero_cliente: num, testo, stato: 'pending',
+  });
+  if (error) { $('provaMsg').textContent = 'Errore: ' + error.message; return; }
+  $('provaMsg').textContent = 'Messaggio di prova messo in coda: arriva sul tuo WhatsApp tra pochi secondi. Se non arriva, il bot sul server non è collegato/attivo.';
+}
 async function caricaProva() {
   const { data } = await sb.from('impostazioni').select('chiave,valore')
     .in('chiave', ['prova_abilitato', 'prova_numero']);
