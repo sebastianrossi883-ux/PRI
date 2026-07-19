@@ -1,7 +1,10 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "echo no-install-needed",
-  "buildCommand": "echo static-site-no-build",
-  "outputDirectory": "web"
+  "version": 2,
+  "builds": [
+    { "src": "web/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/web/index.html" },
+    { "src": "/(.*)", "dest": "/web/$1" }
+  ]
 }
