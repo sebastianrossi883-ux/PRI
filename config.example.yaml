@@ -19,7 +19,10 @@ source:
 
 # Come generare il prompt.
 prompt:
-  # Modello Claude usato per scrivere il prompt.
+  # "ai"  -> Claude riscrive/ottimizza i .md prima di incollarli
+  # "raw" -> incolla i .md cosi' come sono (nessuna AI)
+  mode: ai
+  # Modello Claude usato per scrivere il prompt (solo per mode: ai).
   model: claude-opus-4-8
   # Istruzione di sistema: come deve essere il prompt per Stitch.
   system: >
@@ -43,12 +46,28 @@ stitch:
     user_data_dir: ./.stitch_profile
     # true su Oracle (nessuno schermo); false se vuoi vedere cosa fa.
     headless: true
-    # Selettori dell'interfaccia di Stitch: DA VERIFICARE/ADATTARE.
+
+    # Selezione del modello (come faceva il tuo vecchio programma).
+    model_label: "3.1 pro"
+    model_open_selector: ""     # opzionale: bottone che apre il menu modelli
+    model_option_selector: ""   # opzionale: voce esatta del menu
+
+    # Selezione versione "web" (non "app").
+    web_label: "web"
+    web_open_selector: ""
+    web_option_selector: ""
+
+    # Area prompt / invio / upload. DA VERIFICARE sull'interfaccia reale.
     prompt_selector: "textarea"
     submit_selector: "button[type=submit]"
     upload_selector: "input[type=file]"
     ready_selector: "textarea"
-    post_submit_wait_ms: 4000
+
+    # Attesa fra un prompt e il successivo (per le animazioni in sequenza).
+    # done_selector: elemento che compare quando un prompt ha finito (opzionale).
+    done_selector: ""
+    step_timeout_ms: 120000
+    step_wait_ms: 5000
 
   # Solo per mode: api
   # api_url: "https://il-tuo-endpoint.example/stitch"

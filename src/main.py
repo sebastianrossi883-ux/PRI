@@ -23,8 +23,8 @@ def run_once(cfg: Config, source, builder: PromptBuilder, stitch: StitchClient,
             continue
         log.info("Nuovo job: %s (%d reference)", job.name, len(job.images))
         try:
-            prompt = builder.build(job)
-            result = stitch.deliver(job, prompt)
+            steps = builder.build_steps(job)
+            result = stitch.deliver(job, steps)
             state.mark_done(job.job_id)
             log.info("Job '%s' consegnato: %s", job.name, result)
             done += 1
@@ -48,6 +48,7 @@ def main() -> None:
     cfg = Config.load(args.config)
     source = build_source(cfg.source)
     builder = PromptBuilder(
+        mode=cfg.prompt.get("mode", "ai"),
         model=cfg.prompt.get("model", "claude-opus-4-8"),
         system=cfg.prompt.get("system"),
     )
