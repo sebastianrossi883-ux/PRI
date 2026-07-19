@@ -100,9 +100,12 @@ function creaClientBaileys(config, account = {}) {
             if (evento.type !== 'notify') return;
             for (const msg of evento.messages) {
               try {
-                if (!msg.message || (msg.key && msg.key.fromMe)) continue;
+                if (!msg.message) continue;
                 const jid = msg.key && msg.key.remoteJid;
                 if (!jid || jid.endsWith('@g.us') || jid === 'status@broadcast') continue;
+                // fromMe = messaggio che HAI SCRITTO tu (dall'app WhatsApp o dal bot):
+                // lo sincronizziamo nel pannello come messaggio tuo.
+                const daMe = !!(msg.key && msg.key.fromMe);
                 // WhatsApp a volte usa un ID privacy "@lid" al posto del numero.
                 // In quel caso il numero VERO arriva in un campo alternativo:
                 // lo recuperiamo per mostrarlo e per abbinarlo ai clienti.
@@ -112,10 +115,11 @@ function creaClientBaileys(config, account = {}) {
                   ? (alt ? alt.split('@')[0] : jid.split('@')[0])
                   : jid.split('@')[0];
                 const testo = estraiTesto(msg.message);
+                if (daMe && !testo) continue; // ignora ricevute/reazioni senza testo
                 // 'jid' e' la chat esatta a cui rispondere (anche se e' un @lid).
-                await onMessaggio({ numero, testo, jid, msg });
+                await onMessaggio({ numero, testo, jid, daMe, msg });
               } catch (e) {
-                log.warn('Errore gestione messaggio in arrivo:', e.message);
+                log.warn('Errore gestione messaggio:', e.message);
               }
             }
           });

@@ -86,7 +86,7 @@ async function caricaChat() {
   if (!convAttiva) return;
   const c = convAttiva;
   const [ric, risp] = await Promise.all([
-    sb.from('messaggi_ricevuti').select('testo,ricevuto_il')
+    sb.from('messaggi_ricevuti').select('*')
       .eq('account_id', c.account_id).eq('numero_cliente', c.numero_cliente)
       .order('ricevuto_il', { ascending: true }).limit(500),
     sb.from('risposte_da_inviare').select('testo,creato_il,stato')
@@ -94,7 +94,8 @@ async function caricaChat() {
       .order('creato_il', { ascending: true }).limit(500),
   ]);
   const items = [];
-  (ric.data || []).forEach((m) => items.push({ dir: 'in', testo: m.testo, t: m.ricevuto_il }));
+  // da_me=true = messaggio scritto da te (anche dall'app WhatsApp) -> lato destro.
+  (ric.data || []).forEach((m) => items.push({ dir: m.da_me ? 'out' : 'in', testo: m.testo, t: m.ricevuto_il }));
   (risp.data || []).forEach((m) => items.push({ dir: 'out', testo: m.testo, t: m.creato_il, stato: m.stato }));
   items.sort((a, b) => new Date(a.t) - new Date(b.t));
   const box = $('messages');

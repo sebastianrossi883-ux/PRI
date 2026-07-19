@@ -26,6 +26,10 @@ create table if not exists impostazioni (
 -- che nascondono il numero vero). Se assente, si risponde al numero.
 alter table conversazioni add column if not exists jid text;
 
+-- Segna i messaggi scritti da TE (anche dall'app WhatsApp) per la sincronizzazione
+-- completa: nel pannello compaiono sul lato destro come messaggi tuoi.
+alter table messaggi_ricevuti add column if not exists da_me boolean not null default false;
+
 -- Valori iniziali: modalità prova spenta, invii NON in pausa.
 insert into impostazioni (chiave, valore) values
   ('prova_abilitato', 'false'),

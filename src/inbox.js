@@ -3,6 +3,7 @@
 const log = require('./logger');
 const {
   salvaMessaggioRicevuto,
+  salvaMessaggioMio,
   jidPerConversazione,
   prendiRisposteDaInviare,
   segnaRisposta,
@@ -13,8 +14,13 @@ const {
  * salva su Supabase senza inviare ricevute di lettura (niente spunte blu).
  */
 function creaGestoreArrivo(sb, accountId) {
-  return async ({ numero, testo, jid }) => {
+  return async ({ numero, testo, jid, daMe }) => {
     if (!sb) return; // senza Supabase non c'e' inbox dove salvare
+    if (daMe) {
+      // Messaggio scritto da te (app WhatsApp): lo sincronizziamo nel pannello.
+      await salvaMessaggioMio(sb, accountId, numero, testo, jid);
+      return;
+    }
     await salvaMessaggioRicevuto(sb, accountId, numero, testo, jid);
     log.info(`[${accountId}] messaggio ricevuto da ${numero}: "${(testo || '').slice(0, 60)}"`);
   };

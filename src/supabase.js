@@ -184,6 +184,68 @@ async function salvaMessaggioRicevuto(sb, accountId, numero, testo, jid) {
   if (e2) throw new Error('Supabase (conversazioni): ' + e2.message);
 }
 
+/**
+ * Salva un messaggio che HAI SCRITTO TU (dall'app WhatsApp), per sincronizzarlo
+ * nel pannello. Due accortezze:
+ *  - NON duplica le risposte gia' inviate dal pannello (che tornano come "eco");
+ *  - salva solo se la conversazione ESISTE gia' (evita di riempire l'inbox con
+ *    gli invii a freddo della campagna).
+ */
+async function salvaMessaggioMio(sb, accountId, numero, testo, jid) {
+  if (!testo) return;
+  const dueMinutiFa = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+
+  // 1) E' l'eco di una risposta partita dal pannello? Allora non ri-salvare.
+  const { data: giaInPannello } = await sb
+    .from('risposte_da_inviare')
+    .select('id')
+    .eq('account_id', accountId)
+    .eq('numero_cliente', numero)
+    .eq('testo', testo)
+    .gte('creato_il', dueMinutiFa)
+    .limit(1);
+  if (giaInPannello && giaInPannello.length) return;
+
+  // 2) Sincronizza solo chat gia' esistenti (non gli invii a freddo).
+  const { data: conv } = await sb
+    .from('conversazioni')
+    .select('id')
+    .eq('account_id', accountId)
+    .eq('numero_cliente', numero)
+    .maybeSingle();
+  if (!conv) return;
+
+  // 3) Salva come messaggio mio (da_me=true) e aggiorna la conversazione.
+  const { error: e1 } = await sb.from('messaggi_ricevuti').insert({
+    account_id: accountId,
+    numero_cliente: numero,
+    testo,
+    da_me: true,
+  });
+  if (e1) {
+    // Se la colonna da_me non esiste ancora, non blocchiamo il flusso.
+    if (/da_me/i.test(e1.message)) return;
+    throw new Error('Supabase (mio): ' + e1.message);
+  }
+  const riga = {
+    account_id: accountId,
+    numero_cliente: numero,
+    ultimo_testo: testo,
+    ultimo_il: new Date().toISOString(),
+  };
+  if (jid) riga.jid = jid;
+  let { error: e2 } = await sb.from('conversazioni').upsert(riga, {
+    onConflict: 'account_id,numero_cliente',
+  });
+  if (e2 && /jid/i.test(e2.message)) {
+    delete riga.jid;
+    ({ error: e2 } = await sb.from('conversazioni').upsert(riga, {
+      onConflict: 'account_id,numero_cliente',
+    }));
+  }
+  if (e2) log.warn('Supabase (conversazioni, mio): ' + e2.message);
+}
+
 /** Ritorna il jid esatto a cui rispondere per una conversazione (o null). */
 async function jidPerConversazione(sb, accountId, numero) {
   try {
@@ -230,6 +292,7 @@ module.exports = {
   aggiornaStatoAccount,
   leggiImpostazioni,
   salvaMessaggioRicevuto,
+  salvaMessaggioMio,
   jidPerConversazione,
   prendiRisposteDaInviare,
   segnaRisposta,
