@@ -4,7 +4,15 @@
     { "src": "web/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/", "dest": "/web/index.html" },
-    { "src": "/(.*)", "dest": "/web/$1" }
+    {
+      "src": "/",
+      "headers": { "cache-control": "public, max-age=0, must-revalidate" },
+      "dest": "/web/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "headers": { "cache-control": "public, max-age=0, must-revalidate" },
+      "dest": "/web/$1"
+    }
   ]
 }
