@@ -324,20 +324,34 @@ async function caricaNumeri() {
   }
   if (!data || !data.length) { box.innerHTML = '<div class="empty">Nessun numero. Aggiungine uno sopra.</div>'; return; }
   box.innerHTML = '';
+  let connessi = 0;
   for (const a of data) {
-    const [txt, cls] = etichettaStato[a.stato] || [a.stato || '—', 'muted'];
+    const fermo = a.attivo === false;
+    const [txt, cls] = fermo
+      ? ['Fermo', 'muted']
+      : (etichettaStato[a.stato] || [a.stato || '—', 'muted']);
+    if (!fermo && a.stato === 'connesso') connessi += 1;
     const row = document.createElement('div');
     row.className = 'row';
     row.innerHTML = '<div class="grow"><b>' + esc(a.id) + '</b> <span class="badge ' + cls + '">' + esc(txt) +
-      '</span><br><span class="num">' + esc(a.numero || '') + '</span>' +
-      (a.proxy_url ? '<br><span class="num">IP: ' + esc(mascheraProxy(a.proxy_url)) + '</span>' : '<br><span class="num danger">nessun IP</span>') + '</div>';
+      '</span><br><span class="num">📱 ' + esc(a.numero || '(numero non impostato)') + '</span>' +
+      (a.proxy_url ? '<br><span class="num">🔒 IP isolato: ' + esc(mascheraProxy(a.proxy_url)) + '</span>' : '<br><span class="num danger">⚠️ nessun IP (rischio ban)</span>') + '</div>';
     const azioni = document.createElement('div');
     azioni.className = 'azioni';
+    // AVVIA/FERMA: fa partire o fermare questo numero, isolato dagli altri.
+    const bAvvia = document.createElement('button');
+    bAvvia.textContent = fermo ? '▶ Avvia' : '⏹ Ferma';
+    if (!fermo) bAvvia.className = 'ghost';
+    bAvvia.onclick = async () => {
+      await sb.from('account').update({ attivo: fermo }).eq('id', a.id);
+      $('numeriMsg').textContent = fermo
+        ? a.id + ' avviato (parte tra ~30s, isolato col suo IP).'
+        : a.id + ' fermato.';
+      caricaNumeri();
+    };
     const bQr = document.createElement('button');
     bQr.textContent = a.stato === 'connesso' ? 'Ricollega' : 'Collega';
     bQr.onclick = async () => {
-      // Se e' gia' connesso, per avere un nuovo QR bisogna scollegarlo: mandiamo
-      // il comando 'ricollega' al bot, poi apriamo la finestra del QR.
       if (a.stato === 'connesso') {
         if (!confirm('Ricollegare ' + a.id + '? Si scollega e dovrai riscansionare il QR.')) return;
         await inviaComandoRicollega(a.id);
@@ -351,10 +365,11 @@ async function caricaNumeri() {
       await sb.from('account').delete().eq('id', a.id);
       caricaNumeri();
     };
-    azioni.appendChild(bQr); azioni.appendChild(bDel);
+    azioni.appendChild(bAvvia); azioni.appendChild(bQr); azioni.appendChild(bDel);
     row.appendChild(azioni);
     box.appendChild(row);
   }
+  $('numeriStato').textContent = data.length + ' numeri · ' + connessi + ' connessi';
 }
 function mascheraProxy(u) {
   return String(u).replace(/\/\/([^:@/]+):([^@/]+)@/, '//$1:****@');
