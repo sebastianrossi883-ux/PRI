@@ -22,6 +22,16 @@ create table if not exists impostazioni (
   valore text
 );
 
+-- Comandi dal pannello verso il bot (ponte Vercel -> Supabase -> Oracle):
+-- 'riavvia' = riavvia il bot; 'ricollega' = nuovo QR per un numero.
+create table if not exists comandi (
+  id         bigint generated always as identity primary key,
+  tipo       text not null,
+  account_id text,
+  stato      text not null default 'pending',
+  creato_il  timestamptz not null default now()
+);
+
 -- Chat esatta a cui rispondere (gestisce i contatti "privacy" @lid di WhatsApp,
 -- che nascondono il numero vero). Se assente, si risponde al numero.
 alter table conversazioni add column if not exists jid text;
@@ -40,6 +50,7 @@ on conflict (chiave) do nothing;
 -- ---------- Sicurezza (RLS): solo utenti autenticati dal pannello ----------
 alter table account     enable row level security;
 alter table impostazioni enable row level security;
+alter table comandi     enable row level security;
 
 drop policy if exists account_auth on account;
 create policy account_auth on account
@@ -47,4 +58,8 @@ create policy account_auth on account
 
 drop policy if exists impostazioni_auth on impostazioni;
 create policy impostazioni_auth on impostazioni
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists comandi_auth on comandi;
+create policy comandi_auth on comandi
   for all to authenticated using (true) with check (true);

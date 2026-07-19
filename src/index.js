@@ -12,7 +12,11 @@ const {
   caricaAccountSupabase,
   aggiornaStatoAccount,
   leggiImpostazioni,
+  prendiComandi,
+  segnaComando,
 } = require('./supabase');
+const fs = require('fs');
+const path = require('path');
 const { creaGestoreArrivo, avviaOutbox } = require('./inbox');
 const { Stato } = require('./state');
 const { Sender } = require('./sender');
@@ -226,6 +230,42 @@ async function main() {
         /* riprova al prossimo giro */
       }
     }, 30000);
+  }
+
+  // -------- COMANDI DAL PANNELLO (ponte Vercel -> Supabase -> Oracle) --------
+  // Il pannello scrive un comando su Supabase, il bot lo esegue: cosi' comandi
+  // il motore dal telefono senza SSH. 'riavvia' = riavvio; 'ricollega' = cancella
+  // la sessione di un numero e riparte (nuovo QR nel pannello).
+  if (sb && !args.now) {
+    setInterval(async () => {
+      try {
+        const comandi = await prendiComandi(sb);
+        for (const c of comandi) {
+          await segnaComando(sb, c.id);
+          if (c.tipo === 'ricollega') {
+            const id = c.account_id || 'default';
+            const dir =
+              id === 'default'
+                ? (config.baileys && config.baileys.cartellaSessione) || './.baileys-auth'
+                : `./.baileys-${id}`;
+            try {
+              fs.rmSync(path.resolve(dir), { recursive: true, force: true });
+            } catch (_) {
+              /* ignora */
+            }
+            if (sb) await aggiornaStatoAccount(sb, id, { stato: 'in_attesa', qr: null });
+            log.info(`Comando "ricollega ${id}": sessione azzerata, riavvio per nuovo QR.`);
+            process.exit(0);
+          }
+          if (c.tipo === 'riavvia') {
+            log.info('Comando "riavvia" dal pannello: riavvio.');
+            process.exit(0);
+          }
+        }
+      } catch (_) {
+        /* riprova al prossimo giro */
+      }
+    }, 15000);
   }
 
   const chiusura = async () => {

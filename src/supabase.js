@@ -128,6 +128,27 @@ async function leggiImpostazioni(sb) {
   return map;
 }
 
+/** Legge i comandi in coda dal pannello (Riavvia / Ricollega). */
+async function prendiComandi(sb) {
+  const { data, error } = await sb
+    .from('comandi')
+    .select('id,tipo,account_id')
+    .eq('stato', 'pending')
+    .order('id')
+    .limit(10);
+  if (error) return []; // tabella non ancora creata
+  return data || [];
+}
+
+/** Segna un comando come eseguito. */
+async function segnaComando(sb, id) {
+  try {
+    await sb.from('comandi').update({ stato: 'fatto' }).eq('id', id);
+  } catch (_) {
+    /* ignora */
+  }
+}
+
 /** Aggiorna stato e/o QR di un account (per mostrarli nel pannello). */
 async function aggiornaStatoAccount(sb, id, patch) {
   const riga = { id: String(id), aggiornato_il: new Date().toISOString() };
@@ -291,6 +312,8 @@ module.exports = {
   caricaAccountSupabase,
   aggiornaStatoAccount,
   leggiImpostazioni,
+  prendiComandi,
+  segnaComando,
   salvaMessaggioRicevuto,
   salvaMessaggioMio,
   jidPerConversazione,

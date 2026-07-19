@@ -298,6 +298,17 @@ async function aggiungiMessaggio() {
 /* ---------- NUMERI (account + IP) ---------- */
 $('btnAddAcc').onclick = aggiungiNumero;
 $('btnChiudiQr').onclick = chiudiQr;
+$('btnRiavvia').onclick = async () => {
+  if (!confirm('Riavviare il bot sul server?')) return;
+  const { error } = await sb.from('comandi').insert({ tipo: 'riavvia', stato: 'pending' });
+  $('comandiMsg').textContent = error
+    ? 'Errore: ' + error.message + ' (esegui la migrazione SQL comandi)'
+    : 'Comando inviato: il bot si riavvia entro ~15 secondi.';
+};
+async function inviaComandoRicollega(accountId) {
+  const { error } = await sb.from('comandi').insert({ tipo: 'ricollega', account_id: accountId, stato: 'pending' });
+  return !error;
+}
 const etichettaStato = {
   connesso: ['Connesso', 'ok'], qr: ['QR pronto', 'warn'], avvio: ['Avvio...', 'warn'],
   riconnessione: ['Riconnetto...', 'warn'], in_attesa: ['In attesa', 'muted'],
@@ -324,7 +335,15 @@ async function caricaNumeri() {
     azioni.className = 'azioni';
     const bQr = document.createElement('button');
     bQr.textContent = a.stato === 'connesso' ? 'Ricollega' : 'Collega';
-    bQr.onclick = () => apriQr(a);
+    bQr.onclick = async () => {
+      // Se e' gia' connesso, per avere un nuovo QR bisogna scollegarlo: mandiamo
+      // il comando 'ricollega' al bot, poi apriamo la finestra del QR.
+      if (a.stato === 'connesso') {
+        if (!confirm('Ricollegare ' + a.id + '? Si scollega e dovrai riscansionare il QR.')) return;
+        await inviaComandoRicollega(a.id);
+      }
+      apriQr(a);
+    };
     const bDel = document.createElement('button');
     bDel.className = 'del'; bDel.textContent = 'Elimina';
     bDel.onclick = async () => {
