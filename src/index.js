@@ -98,6 +98,44 @@ async function caricaDati(config, sb, prefisso) {
   return { blocklist, clienti, messaggi };
 }
 
+/**
+ * Applica alla config le impostazioni gestite dal pannello (tabella impostazioni).
+ * I valori vuoti/assenti lasciano i predefiniti della config del server.
+ */
+function applicaImpostazioni(config, imp) {
+  const n = (v, d) => {
+    const x = parseInt(v, 10);
+    return Number.isFinite(x) ? x : d;
+  };
+  // MODALITA' PROVA
+  if (imp.prova_abilitato !== undefined || imp.prova_numero) {
+    config.prova = {
+      abilitato: imp.prova_abilitato === 'true' || imp.prova_abilitato === true,
+      numero: imp.prova_numero || (config.prova && config.prova.numero) || '',
+    };
+  }
+  // INVII (random) modificabili dal pannello
+  config.invii = config.invii || {};
+  if (imp.inv_giorno) config.invii.messaggiAlGiorno = n(imp.inv_giorno, config.invii.messaggiAlGiorno);
+  if (imp.inv_intMin) config.invii.intervalloMinMinuti = n(imp.inv_intMin, config.invii.intervalloMinMinuti);
+  if (imp.inv_intMax) config.invii.intervalloMaxMinuti = n(imp.inv_intMax, config.invii.intervalloMaxMinuti);
+  config.avvioGiornaliero = config.avvioGiornaliero || {};
+  if (imp.inv_ritMin) config.avvioGiornaliero.ritardoMinMinuti = n(imp.inv_ritMin, config.avvioGiornaliero.ritardoMinMinuti);
+  if (imp.inv_ritMax) config.avvioGiornaliero.ritardoMaxMinuti = n(imp.inv_ritMax, config.avvioGiornaliero.ritardoMaxMinuti);
+  config.finestra = config.finestra || {};
+  if (imp.inv_oraInizio) config.finestra.oraInizio = imp.inv_oraInizio;
+  if (imp.inv_oraFine) config.finestra.oraFine = imp.inv_oraFine;
+}
+
+/** Firma delle impostazioni: se cambia, il bot si riavvia per applicarle. */
+function chiaveImpostazioniDa(imp) {
+  return JSON.stringify([
+    imp.prova_abilitato, imp.prova_numero, imp.pausa,
+    imp.inv_giorno, imp.inv_intMin, imp.inv_intMax,
+    imp.inv_ritMin, imp.inv_ritMax, imp.inv_oraInizio, imp.inv_oraFine,
+  ]);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const config = caricaConfig();
@@ -110,13 +148,8 @@ async function main() {
   let chiaveImpostazioni = '';
   if (sb) {
     const imp = await leggiImpostazioni(sb);
-    if (imp.prova_abilitato !== undefined || imp.prova_numero) {
-      config.prova = {
-        abilitato: imp.prova_abilitato === 'true' || imp.prova_abilitato === true,
-        numero: imp.prova_numero || (config.prova && config.prova.numero) || '',
-      };
-    }
-    chiaveImpostazioni = `${config.prova && config.prova.abilitato}|${config.prova && config.prova.numero}`;
+    applicaImpostazioni(config, imp);
+    chiaveImpostazioni = chiaveImpostazioniDa(imp);
     if (config.prova && config.prova.abilitato) {
       log.warn(`MODALITA' PROVA ATTIVA: i messaggi vanno al tuo numero ${config.prova.numero}, non ai clienti.`);
     }
@@ -219,11 +252,10 @@ async function main() {
             process.exit(0); // pm2 riavvia in automatico
           }
         }
-        // 2) Modalita' prova accesa/spenta o numero cambiato dal pannello.
+        // 2) Impostazioni cambiate dal pannello (prova, invii random, orari...).
         const imp = await leggiImpostazioni(sb);
-        const chiave = `${imp.prova_abilitato === 'true' || imp.prova_abilitato === true}|${imp.prova_numero || ''}`;
-        if (chiaveImpostazioni && chiave !== chiaveImpostazioni) {
-          log.info('Impostazioni prova cambiate dal pannello: riavvio per applicare.');
+        if (chiaveImpostazioni && chiaveImpostazioniDa(imp) !== chiaveImpostazioni) {
+          log.info('Impostazioni cambiate dal pannello: riavvio per applicare.');
           process.exit(0);
         }
       } catch (_) {

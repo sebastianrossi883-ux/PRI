@@ -28,6 +28,7 @@
       <button data-view="clienti" class="tab">Clienti</button>
       <button data-view="messaggi" class="tab">Testi</button>
       <button data-view="numeri" class="tab">Numeri</button>
+      <button data-view="impostazioni" class="tab">Impostazioni</button>
       <button data-view="report" class="tab">Report</button>
     </nav>
     <span class="status" id="status"></span>
@@ -125,6 +126,24 @@
       <button class="ghost" id="btnChiudiQr">Chiudi</button>
     </div>
   </div>
+
+  <!-- VIEW: IMPOSTAZIONI -->
+  <section id="view-impostazioni" class="view hidden">
+    <div class="pane">
+      <h3>Impostazioni invii (random)</h3>
+      <p class="muted small">Cambia i valori dell'invio automatico. Se lasci un campo <b>vuoto</b> resta il predefinito (tra parentesi nel campo). Si applica entro ~30 secondi.</p>
+      <label class="fld">Messaggi al giorno <input id="setGiorno" type="number" inputmode="numeric" placeholder="predefinito 40" /></label>
+      <label class="fld">Tempo tra un messaggio e l'altro — MIN (minuti) <input id="setIntMin" type="number" inputmode="numeric" placeholder="predefinito 12" /></label>
+      <label class="fld">Tempo tra un messaggio e l'altro — MAX (minuti) <input id="setIntMax" type="number" inputmode="numeric" placeholder="predefinito 22" /></label>
+      <label class="fld">Ritardo di partenza — MIN (minuti) <input id="setRitMin" type="number" inputmode="numeric" placeholder="predefinito 20" /></label>
+      <label class="fld">Ritardo di partenza — MAX (minuti) <input id="setRitMax" type="number" inputmode="numeric" placeholder="predefinito 60" /></label>
+      <label class="fld">Ora inizio (24h) <input id="setOraInizio" placeholder="predefinito 07:00" /></label>
+      <label class="fld">Ora fine (24h) <input id="setOraFine" placeholder="predefinito 20:00" /></label>
+      <button id="btnSalvaSet">Salva impostazioni</button>
+      <div class="msg" id="setMsg"></div>
+      <p class="muted small">I predefiniti sono quelli che abbiamo impostato noi: 40 messaggi/giorno, 12–22 min tra i messaggi, partenza 20–60 min dopo le 07:00, finestra 07:00–20:00.</p>
+    </div>
+  </section>
 
   <!-- VIEW: REPORT -->
   <section id="view-report" class="view hidden">

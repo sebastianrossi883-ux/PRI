@@ -44,6 +44,7 @@ function apriView(v) {
   if (v === 'clienti') caricaClienti();
   if (v === 'messaggi') caricaMessaggi();
   if (v === 'numeri') { caricaNumeri(); caricaProva(); caricaPausa(); timerNumeri = setInterval(caricaNumeri, 5000); }
+  if (v === 'impostazioni') caricaSet();
   if (v === 'report') caricaReport();
 }
 
@@ -483,6 +484,31 @@ async function salvaProva() {
   $('provaMsg').textContent = on
     ? 'Prova ATTIVA: i messaggi vanno a ' + num + ' (attiva entro ~30s).'
     : 'Prova spenta: i messaggi vanno ai clienti reali.';
+}
+
+/* ---------- IMPOSTAZIONI INVII (random) ---------- */
+$('btnSalvaSet').onclick = salvaSet;
+const CHIAVI_SET = {
+  setGiorno: 'inv_giorno', setIntMin: 'inv_intMin', setIntMax: 'inv_intMax',
+  setRitMin: 'inv_ritMin', setRitMax: 'inv_ritMax',
+  setOraInizio: 'inv_oraInizio', setOraFine: 'inv_oraFine',
+};
+async function caricaSet() {
+  const { data } = await sb.from('impostazioni').select('chiave,valore')
+    .in('chiave', Object.values(CHIAVI_SET));
+  const m = {};
+  (data || []).forEach((r) => { m[r.chiave] = r.valore; });
+  for (const [id, chiave] of Object.entries(CHIAVI_SET)) $(id).value = m[chiave] || '';
+}
+async function salvaSet() {
+  const righe = [];
+  for (const [id, chiave] of Object.entries(CHIAVI_SET)) {
+    righe.push({ chiave, valore: $(id).value.trim() });
+  }
+  const { error } = await sb.from('impostazioni').upsert(righe, { onConflict: 'chiave' });
+  $('setMsg').textContent = error
+    ? 'Errore: ' + error.message
+    : 'Impostazioni salvate. Il bot le applica entro ~30 secondi.';
 }
 
 /* ---------- REPORT ---------- */
