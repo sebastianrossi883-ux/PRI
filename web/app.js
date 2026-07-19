@@ -35,7 +35,7 @@ document.querySelectorAll('#nav .tab').forEach((b) => {
 });
 function apriView(v) {
   document.querySelectorAll('#nav .tab').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
-  ['inbox', 'clienti', 'messaggi', 'numeri', 'report'].forEach((k) => {
+  ['inbox', 'clienti', 'messaggi', 'numeri', 'impostazioni', 'report'].forEach((k) => {
     $('view-' + k).classList.toggle('hidden', k !== v);
   });
   if (timerLista) clearInterval(timerLista);
