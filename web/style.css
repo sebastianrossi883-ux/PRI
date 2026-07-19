@@ -95,6 +95,8 @@ code { background: var(--bg); padding: 1px 5px; border-radius: 5px; font-size: 1
 .num.danger { color: var(--danger); }
 .fld { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
 .fld input { color: var(--text); }
+input:disabled, textarea:disabled { opacity: .5; cursor: not-allowed; }
+button:disabled { opacity: .45; cursor: not-allowed; }
 .switch { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
 .switch input { width: auto; }
 .switch.big { font-size: 16px; font-weight: 600; padding: 12px; border: 1px solid var(--border);

@@ -493,12 +493,22 @@ const CHIAVI_SET = {
   setRitMin: 'inv_ritMin', setRitMax: 'inv_ritMax',
   setOraInizio: 'inv_oraInizio', setOraFine: 'inv_oraFine',
 };
+const campiSet = () => Object.keys(CHIAVI_SET).map((id) => $(id));
+function bloccaSet(bloccato) {
+  campiSet().forEach((el) => { el.disabled = bloccato; });
+  $('btnSalvaSet').disabled = bloccato;
+}
+$('setSblocca').onchange = () => bloccaSet(!$('setSblocca').checked);
 async function caricaSet() {
   const { data } = await sb.from('impostazioni').select('chiave,valore')
     .in('chiave', Object.values(CHIAVI_SET));
   const m = {};
   (data || []).forEach((r) => { m[r.chiave] = r.valore; });
   for (const [id, chiave] of Object.entries(CHIAVI_SET)) $(id).value = m[chiave] || '';
+  // Parte sempre BLOCCATO (spunta di sicurezza da attivare).
+  $('setSblocca').checked = false;
+  bloccaSet(true);
+  $('setMsg').textContent = '';
 }
 async function salvaSet() {
   const righe = [];
@@ -506,10 +516,21 @@ async function salvaSet() {
     righe.push({ chiave, valore: $(id).value.trim() });
   }
   const { error } = await sb.from('impostazioni').upsert(righe, { onConflict: 'chiave' });
-  $('setMsg').textContent = error
-    ? 'Errore: ' + error.message
-    : 'Impostazioni salvate. Il bot le applica entro ~30 secondi.';
+  if (error) { $('setMsg').textContent = 'Errore: ' + error.message; return; }
+  $('setMsg').textContent = 'Impostazioni salvate. Il bot le applica entro ~30 secondi.';
+  $('setSblocca').checked = false;
+  bloccaSet(true);
 }
+$('btnRipristina').onclick = async () => {
+  if (!confirm('Riportare tutto ai valori predefiniti (40/giorno · 12–22 min · 20–60 min · 07:00–20:00)?')) return;
+  const righe = Object.values(CHIAVI_SET).map((chiave) => ({ chiave, valore: '' }));
+  const { error } = await sb.from('impostazioni').upsert(righe, { onConflict: 'chiave' });
+  if (error) { $('setMsg').textContent = 'Errore: ' + error.message; return; }
+  campiSet().forEach((el) => { el.value = ''; });
+  $('setSblocca').checked = false;
+  bloccaSet(true);
+  $('setMsg').textContent = 'Riportato ai valori predefiniti (i nostri). Applicato entro ~30s.';
+};
 
 /* ---------- REPORT ---------- */
 async function caricaReport() {
