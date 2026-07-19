@@ -69,6 +69,12 @@ stitch:
     step_timeout_ms: 120000
     step_wait_ms: 5000
 
+    # Scaricare il risultato finale da Stitch (opzionale).
+    # Se vuoto, il risultato resta dentro Stitch (nel tuo account).
+    # Metti qui il selettore del pulsante "download/esporta" di Stitch.
+    result_download_selector: ""
+    results_dir: ./results
+
   # Solo per mode: api
   # api_url: "https://il-tuo-endpoint.example/stitch"
   # api_token: ""

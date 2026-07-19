@@ -47,6 +47,12 @@ DEFAULTS = {
     "done_selector": "",
     "step_timeout_ms": 120000,
     "step_wait_ms": 5000,
+
+    # Scaricare il risultato finale da Stitch (opzionale).
+    # Se "result_download_selector" e' vuoto, il risultato resta dentro Stitch
+    # (nel tuo account) e non viene scaricato.
+    "result_download_selector": "",
+    "results_dir": "./results",
 }
 
 
@@ -143,6 +149,23 @@ class StitchBrowser:
                     self._send_prompt(page, text)
                     self._wait_done(page)
 
-                return f"browser -> inviati {len(steps)} prompt a Stitch"
+                # 6) scarica il risultato finale (se configurato)
+                saved = self._download_result(page, job)
+                extra = f", risultato in {saved}" if saved else ""
+                return f"browser -> inviati {len(steps)} prompt a Stitch{extra}"
             finally:
                 ctx.close()
+
+    def _download_result(self, page, job: Job) -> str | None:
+        """Clicca il pulsante di download di Stitch e salva in results_dir/<job>/."""
+        sel = self.cfg["result_download_selector"]
+        if not sel:
+            return None
+        dest_dir = Path(self.cfg["results_dir"]) / job.name
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        with page.expect_download(timeout=int(self.cfg["step_timeout_ms"])) as dl:
+            page.click(sel)
+        download = dl.value
+        dest = dest_dir / (download.suggested_filename or "risultato")
+        download.save_as(str(dest))
+        return str(dest)
