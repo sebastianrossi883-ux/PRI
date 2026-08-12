@@ -317,7 +317,7 @@ const etichettaStato = {
 };
 async function caricaNumeri() {
   const { data, error } = await sb.from('account')
-    .select('id,numero,proxy_url,attivo,stato').order('id');
+    .select('id,numero,proxy_url,attivo,stato,rodaggio').order('id');
   const box = $('numeriList');
   if (error) {
     box.innerHTML = '<div class="empty">Tabella non trovata. Esegui la migrazione SQL (migrazione-fase5.sql) su Supabase.</div>';
@@ -334,11 +334,22 @@ async function caricaNumeri() {
     if (!fermo && a.stato === 'connesso') connessi += 1;
     const row = document.createElement('div');
     row.className = 'row';
+    const rodaggio = a.rodaggio !== false;
     row.innerHTML = '<div class="grow"><b>' + esc(a.id) + '</b> <span class="badge ' + cls + '">' + esc(txt) +
-      '</span><br><span class="num">📱 ' + esc(a.numero || '(numero non impostato)') + '</span>' +
+      '</span> <span class="badge ' + (rodaggio ? 'warn' : 'ok') + '">' + (rodaggio ? '🐣 Rodaggio' : '✅ Consolidato') + '</span>' +
+      '<br><span class="num">📱 ' + esc(a.numero || '(numero non impostato)') + '</span>' +
       (a.proxy_url ? '<br><span class="num">🔒 IP isolato: ' + esc(mascheraProxy(a.proxy_url)) + '</span>' : '<br><span class="num danger">⚠️ nessun IP (rischio ban)</span>') + '</div>';
     const azioni = document.createElement('div');
     azioni.className = 'azioni';
+    // NUOVO/CONSOLIDATO: attiva o disattiva il rodaggio (warm-up) di questo numero.
+    const bRod = document.createElement('button');
+    bRod.className = 'ghost';
+    bRod.textContent = rodaggio ? '→ Consolidato' : '→ Rodaggio';
+    bRod.onclick = async () => {
+      await sb.from('account').update({ rodaggio: !rodaggio }).eq('id', a.id);
+      $('numeriMsg').textContent = a.id + (rodaggio ? ' impostato CONSOLIDATO (invio pieno).' : ' impostato in RODAGGIO (parte piano).');
+      caricaNumeri();
+    };
     // AVVIA/FERMA: fa partire o fermare questo numero, isolato dagli altri.
     const bAvvia = document.createElement('button');
     bAvvia.textContent = fermo ? '▶ Avvia' : '⏹ Ferma';
@@ -366,7 +377,7 @@ async function caricaNumeri() {
       await sb.from('account').delete().eq('id', a.id);
       caricaNumeri();
     };
-    azioni.appendChild(bAvvia); azioni.appendChild(bQr); azioni.appendChild(bDel);
+    azioni.appendChild(bRod); azioni.appendChild(bAvvia); azioni.appendChild(bQr); azioni.appendChild(bDel);
     row.appendChild(azioni);
     box.appendChild(row);
   }
@@ -380,8 +391,9 @@ async function aggiungiNumero() {
   const numero = normNum($('accNumero').value.trim());
   const proxy = $('accProxy').value.trim();
   if (!id) { $('numeriMsg').textContent = 'Metti un nome breve (es. num1).'; return; }
+  const rodaggio = $('accRodaggio') ? $('accRodaggio').checked : true;
   const { error } = await sb.from('account').upsert(
-    { id, numero, proxy_url: proxy, attivo: true, stato: 'in_attesa' }, { onConflict: 'id' });
+    { id, numero, proxy_url: proxy, attivo: true, stato: 'in_attesa', rodaggio }, { onConflict: 'id' });
   if (error) { $('numeriMsg').textContent = 'Errore: ' + error.message; return; }
   $('numeriMsg').textContent = 'Numero salvato. Premi "Collega" per il QR.';
   $('accId').value = ''; $('accNumero').value = ''; $('accProxy').value = '';

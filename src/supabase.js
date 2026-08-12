@@ -97,7 +97,7 @@ async function scriviReportSupabase(sb, dataKey, riepilogo) {
 async function caricaAccountSupabase(sb) {
   const { data, error } = await sb
     .from('account')
-    .select('id,numero,proxy_url,attivo')
+    .select('id,numero,proxy_url,attivo,rodaggio')
     .order('id');
   if (error) {
     // Tabella non ancora creata: nessun blocco, si torna al singolo numero.
@@ -110,6 +110,9 @@ async function caricaAccountSupabase(sb) {
       id: String(a.id),
       numero: a.numero || '',
       proxyUrl: a.proxy_url || '',
+      // rodaggio=true (default) -> numero NUOVO: warm-up progressivo.
+      // rodaggio=false -> numero CONSOLIDATO: pieno + variazione giornaliera.
+      rodaggio: a.rodaggio !== false,
       // Cartella sessione ISOLATA per numero: non si mescolano mai.
       // Per 'default' NON forziamo la cartella: resta quella di config
       // (./.baileys-auth), cosi' la sessione gia' collegata non va persa.

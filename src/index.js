@@ -212,7 +212,22 @@ async function main() {
     // Stato separato per account (conteggi, warm-up, rotazione indipendenti).
     const statoPath = config.file.statoPath.replace(/\.json$/, `-${id}.json`);
     const stato = new Stato(statoPath);
-    const sender = new Sender(client, config, false);
+    // Config di invio PER QUESTO NUMERO: se e' in rodaggio (nuovo) usa il warm-up
+    // progressivo; se e' consolidato usa il pieno con variazione giornaliera.
+    const cfgAcc = JSON.parse(JSON.stringify(config));
+    cfgAcc.warmup = cfgAcc.warmup || {};
+    cfgAcc.variazioneGiornaliera = cfgAcc.variazioneGiornaliera || {};
+    if (acc.rodaggio === false) {
+      cfgAcc.warmup.abilitato = false;
+      cfgAcc.variazioneGiornaliera.abilitato = true;
+      log.info(`[${id}] numero CONSOLIDATO: invio pieno + variazione giornaliera.`);
+    } else {
+      cfgAcc.warmup.abilitato = true;
+      cfgAcc.variazioneGiornaliera.abilitato = false;
+      log.info(`[${id}] numero NUOVO: rodaggio (warm-up) progressivo.`);
+    }
+
+    const sender = new Sender(client, cfgAcc, false);
     // Pausa comandabile dal pannello: legge l'interruttore 'pausa' da Supabase.
     const pausaProvider = sb
       ? async () => {
@@ -221,7 +236,7 @@ async function main() {
         }
       : null;
     const scheduler = new Scheduler({
-      config,
+      config: cfgAcc,
       sender,
       stato,
       clienti: gruppiClienti[i],
@@ -240,13 +255,13 @@ async function main() {
   // cosi' il nuovo numero parte con il SUO IP e la SUA sessione. I numeri gia'
   // collegati non richiedono di riscansionare il QR (la sessione resta salvata).
   if (sb && !args.now) {
-    const chiaviIniziali = account.map((a) => a.id).sort().join('|');
+    const chiaviIniziali = account.map((a) => `${a.id}:${a.rodaggio}`).sort().join('|');
     setInterval(async () => {
       try {
-        // 1) Numeri aggiunti/tolti dal pannello.
+        // 1) Numeri aggiunti/tolti/cambiati (anche rodaggio) dal pannello.
         if (dinamico) {
           const ora = await caricaAccountSupabase(sb);
-          const chiavi = ora.map((a) => a.id).sort().join('|');
+          const chiavi = ora.map((a) => `${a.id}:${a.rodaggio}`).sort().join('|');
           if (chiavi !== chiaviIniziali) {
             log.info('Elenco numeri cambiato dal pannello: riavvio per applicare.');
             process.exit(0); // pm2 riavvia in automatico
